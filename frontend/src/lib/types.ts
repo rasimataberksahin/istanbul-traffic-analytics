@@ -131,6 +131,10 @@ export interface MonthlyInsight {
   nightSpeedKmh: number | null;
   congestionIndex: number | null;
   congestedHoursPerWeekday: number | null;
+  /** Evening peak with cell weights fixed to their first-year vehicle shares. */
+  fixedWeightEveningSpeedKmh: number | null;
+  /** Evening peak of the median cell. */
+  medianCellEveningSpeedKmh: number | null;
 }
 
 export interface MonthHourCell {

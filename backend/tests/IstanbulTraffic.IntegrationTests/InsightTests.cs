@@ -30,6 +30,19 @@ public sealed class InsightEndpointTests(ApiFixture fixture)
     }
 
     [Fact]
+    public async Task Fixed_weight_speed_uses_the_first_year_shares()
+    {
+        // October 2023 is the only month of the first loaded year, so its evening vehicles (10:20:30)
+        // fix the weights. Cell evening speeds are the mean of 17, 18 and 19 o'clock.
+        var months = await GetAsync("/api/v1/insights/monthly");
+
+        Assert.Equal(60.00m, months[0].GetProperty("fixedWeightEveningSpeedKmh").GetDecimal());
+        Assert.Equal(51.67m, months[0].GetProperty("medianCellEveningSpeedKmh").GetDecimal());
+        Assert.Equal(53.33m, months[1].GetProperty("fixedWeightEveningSpeedKmh").GetDecimal());
+        Assert.Equal(46.67m, months[1].GetProperty("medianCellEveningSpeedKmh").GetDecimal());
+    }
+
+    [Fact]
     public async Task Month_hour_matrix_has_every_weekday_hour()
     {
         var cells = await GetAsync("/api/v1/insights/month-hour");

@@ -61,7 +61,7 @@ Bu uçlar filtre almaz ve yüklenen tüm ayları kapsar. Hepsi özet katmandan o
 
 | Yöntem | Yol | Açıklama |
 |---|---|---|
-| GET | `/api/v1/insights/monthly` | Her ayın hızları, tıkanıklık endeksi, yoğun saat sayısı, hacmi ve veri kapsamı |
+| GET | `/api/v1/insights/monthly` | Her ayın hızları, tıkanıklık endeksi, yoğun saat sayısı, hacmi ve veri kapsamı. Akşam zirvesi ayrıca sabit ağırlıkla (`fixedWeightEveningSpeedKmh`) ve medyan hücreyle (`medianCellEveningSpeedKmh`) verilir |
 | GET | `/api/v1/insights/month-hour` | Ay ve saat bazında hafta içi hız |
 | GET | `/api/v1/insights/day-of-week` | Haftanın günü ve saat bazında hız ve hacim |
 | GET | `/api/v1/insights/calendar` | Her gün için hız, akşam hızı ve denk geldiği takvim dönemleri |

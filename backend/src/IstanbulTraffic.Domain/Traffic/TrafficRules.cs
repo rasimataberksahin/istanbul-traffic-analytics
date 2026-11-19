@@ -35,6 +35,9 @@ public static class TrafficRules
     public const int HolidayBaselineDays = 21;
 
     public const int ComparisonWindowMonths = 12;
+
+    /// <summary>Months at the start of the data whose evening vehicle shares fix the cell weights.</summary>
+    public const int BaseWeightMonths = 12;
     public const int MinimumComparisonPeakHours = 60;
 
     /// <summary>

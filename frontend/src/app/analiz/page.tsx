@@ -179,6 +179,18 @@ export default async function AnalysisPage() {
   const totalRows = monthly.reduce((sum, month) => sum + month.rowCount, 0);
   const evening = compareYears(monthly, (month) => month.eveningPeakSpeedKmh);
   const congestion = compareYears(monthly, (month) => month.congestionIndex);
+  // The vehicle-weighted city speed moves when the counting level changes, so it is checked against
+  // two measures that do not depend on vehicle counts between months.
+  const fixedWeight = compareYears(monthly, (month) => month.fixedWeightEveningSpeedKmh);
+  const medianCell = compareYears(monthly, (month) => month.medianCellEveningSpeedKmh);
+  const fasterMonths = (comparison: typeof evening) =>
+    comparison ? comparison.pairs.filter((pair) => (pair.change ?? 0) > 0).length : 0;
+  const comparedMonths = (comparison: typeof evening) =>
+    comparison ? comparison.pairs.filter((pair) => pair.change !== null).length : 0;
+  const weightingDisagrees =
+    evening?.averageChange != null &&
+    fixedWeight?.averageChange != null &&
+    Math.sign(evening.averageChange) !== Math.sign(fixedWeight.averageChange);
   const currentYear = evening?.currentYear ?? Number(last.month.slice(0, 4));
   const previousYearNumber = currentYear - 1;
 
@@ -383,6 +395,12 @@ export default async function AnalysisPage() {
                   )}
                 >
                   {yearSummary(evening.pairs)}
+                  {fixedWeight?.averageChange != null
+                    ? t(
+                        ` Hücre ağırlıkları ilk yıla sabitlendiğinde fark ${formatSigned(fixedWeight.averageChange)} km/sa olur.`,
+                        ` With cell weights fixed to the first year the change is ${formatSigned(fixedWeight.averageChange)} km/h.`,
+                      )
+                    : ""}
                 </Finding>
               ) : null}
               {ramadanFinding}
@@ -522,6 +540,79 @@ export default async function AnalysisPage() {
                     positiveLabel={t("Daha hızlı", "Faster")}
                   />
                 </ChartCard>
+                {fixedWeight && medianCell ? (
+                  <>
+                    <ChartCard
+                      className="span-8"
+                      info={
+                        <>
+                          <p>
+                            {t(
+                              "Şehir ortalaması araç sayısıyla ağırlıklıdır. İBB'nin araç sayımı Ocak 2024'te değiştiği için bazı hücrelerin ağırlığı arttı ve ortalama, hiçbir yer hızlanmasa bile yükselebilir.",
+                              "The city average is weighted by vehicle counts. IMM's vehicle counting changed in January 2024, which raised the weight of some cells, so the average can rise even if no place got faster.",
+                            )}
+                          </p>
+                          <p>
+                            {t(
+                              "Sabit ağırlık: her hücre, ilk yüklenen yıldaki akşam araç payıyla ağırlıklandırılır ve bu ağırlık hiç değişmez. Medyan hücre: her hücre eşit sayılır. İki ölçü de sayım değişikliğinden etkilenmez.",
+                              "Fixed weight: every cell keeps its share of evening vehicles in the first loaded year. Median cell: every cell counts the same. Neither measure is affected by the counting change.",
+                            )}
+                          </p>
+                        </>
+                      }
+                      subtitle={t(
+                        `Akşam zirvesinin ${evening.previousYear}'e göre aylık farkı, üç farklı ağırlıkla (${speedUnit})`,
+                        `Monthly change in the evening peak against ${evening.previousYear}, with three weightings (${speedUnit})`,
+                      )}
+                      table={
+                        <DataTable
+                          columns={[monthCol, t("Araç ağırlıklı", "Vehicle-weighted"), t("Sabit ağırlık", "Fixed weight"), t("Medyan hücre", "Median cell")]}
+                          rows={evening.pairs.map((pair, index) => [
+                            formatMonthIndex(pair.monthIndex),
+                            pair.change === null ? "-" : formatSigned(pair.change),
+                            fixedWeight.pairs[index]?.change == null ? "-" : formatSigned(fixedWeight.pairs[index]?.change ?? 0),
+                            medianCell.pairs[index]?.change == null ? "-" : formatSigned(medianCell.pairs[index]?.change ?? 0),
+                          ])}
+                        />
+                      }
+                      title={t("Hızlanma gerçek mi?", "Is the speed-up real?")}
+                    >
+                      <SeriesChart
+                        ariaLabel={t("Üç farklı ağırlıkla akşam zirvesinin yıllık farkı", "Year-on-year change in the evening peak with three weightings")}
+                        labels={evening.pairs.map((pair) => formatMonthIndex(pair.monthIndex))}
+                        series={[
+                          { id: "vehicle", label: t("Araç ağırlıklı", "Vehicle-weighted"), color: "var(--series-2)", values: evening.pairs.map((pair) => pair.change) },
+                          { id: "fixed", label: t("Sabit ağırlık", "Fixed weight"), color: "var(--series-1)", values: fixedWeight.pairs.map((pair) => pair.change) },
+                          { id: "median", label: t("Medyan hücre", "Median cell"), color: "var(--series-3)", values: medianCell.pairs.map((pair) => pair.change) },
+                        ]}
+                        ticks={evening.pairs.map((pair) => ({ index: pair.monthIndex, label: formatMonthIndex(pair.monthIndex) }))}
+                        unit="speed"
+                      />
+                    </ChartCard>
+                    <div className="span-4 stack">
+                      <Finding
+                        title={
+                          weightingDisagrees
+                            ? t("Şehir ortalamasındaki hızlanma bir ağırlık etkisi", "The city-wide speed-up is a weighting effect")
+                            : t("Üç ölçü aynı yönü gösteriyor", "All three measures agree")
+                        }
+                      >
+                        {t(
+                          `Araç ağırlıklı ortalamaya göre akşamlar ${comparedMonths(evening)} ayın ${fasterMonths(evening)}'inde hızlandı, ortalama ${formatSigned(evening.averageChange ?? 0)} km/sa. Ağırlıklar sabitlendiğinde fark ${formatSigned(fixedWeight.averageChange ?? 0)} km/sa ve hızlanan ay sayısı ${fasterMonths(fixedWeight)}. Medyan hücrede ${formatSigned(medianCell.averageChange ?? 0)} km/sa.`,
+                          `By the vehicle-weighted average, evenings got faster in ${fasterMonths(evening)} of ${comparedMonths(evening)} months, by ${formatSigned(evening.averageChange ?? 0)} km/h on average. With fixed weights the change is ${formatSigned(fixedWeight.averageChange ?? 0)} km/h and ${fasterMonths(fixedWeight)} months got faster. The median cell changed by ${formatSigned(medianCell.averageChange ?? 0)} km/h.`,
+                        )}
+                      </Finding>
+                      {weightingDisagrees ? (
+                        <Finding title={t("Neden?", "Why?")}>
+                          {t(
+                            "Ocak 2024'teki sayım değişikliğiyle araç sayısı en çok hızlı yollarda (otoyollarda) arttıysa, bu yolların ortalamadaki payı büyür ve ortalama hız yükselir. Yani yükseliş yolların hızlanmasından değil, ağırlıkların kaymasından gelir.",
+                            "If the January 2024 counting change raised vehicle counts most on fast roads such as motorways, those roads gain weight in the average and the average speed rises. The rise then comes from shifted weights, not from faster roads.",
+                          )}
+                        </Finding>
+                      ) : null}
+                    </div>
+                  </>
+                ) : null}
                 {congestion?.averageChange !== null && congestion?.averageChange !== undefined ? (
                   <div className="span-12">
                     <Finding

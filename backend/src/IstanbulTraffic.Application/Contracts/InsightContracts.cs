@@ -34,6 +34,15 @@ public sealed record MonthlyInsight
 
     /// <summary>Average number of weekday hours in which the city runs below the congested speed ratio.</summary>
     public decimal? CongestedHoursPerWeekday { get; init; }
+
+    /// <summary>
+    /// Evening peak speed with each cell weighted by its evening vehicle share in the first loaded year.
+    /// Unlike the vehicle-weighted speed, it does not move when the vehicle counting level changes.
+    /// </summary>
+    public decimal? FixedWeightEveningSpeedKmh { get; init; }
+
+    /// <summary>Evening peak speed of the median cell: every cell counts the same.</summary>
+    public decimal? MedianCellEveningSpeedKmh { get; init; }
 }
 
 public sealed record MonthHourCell

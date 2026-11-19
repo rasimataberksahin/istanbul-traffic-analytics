@@ -106,9 +106,16 @@ export function LineChart({
         >
           {scale.ticks.map((tick) => (
             <g key={tick}>
-              <line stroke="var(--grid)" x1={MARGIN.left} x2={MARGIN.left + plotWidth} y1={y(tick)} y2={y(tick)} />
+              <line
+                stroke={tick === 0 && scale.min < 0 ? "var(--axis)" : "var(--grid)"}
+                strokeWidth={tick === 0 && scale.min < 0 ? 1.5 : 1}
+                x1={MARGIN.left}
+                x2={MARGIN.left + plotWidth}
+                y1={y(tick)}
+                y2={y(tick)}
+              />
               <text className="axis-text" dominantBaseline="middle" textAnchor="end" x={MARGIN.left - 8} y={y(tick)}>
-                {f.formatInteger(tick)}
+                {tick < 0 ? `−${f.formatInteger(-tick)}` : f.formatInteger(tick)}
               </text>
             </g>
           ))}

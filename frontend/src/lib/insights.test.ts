@@ -28,6 +28,8 @@ function month(value: string, speed: number | null): MonthlyInsight {
     nightSpeedKmh: speed,
     congestionIndex: null,
     congestedHoursPerWeekday: null,
+    fixedWeightEveningSpeedKmh: speed,
+    medianCellEveningSpeedKmh: speed,
   };
 }
 

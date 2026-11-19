@@ -10,23 +10,23 @@
 |---|---|
 | **Veri** | Ocak 2023 - Ocak 2025, 25 ay, 40,1 milyon saatlik ölçüm, 2.464 konum hücresi |
 | **Hat** | Python ETL → PostgreSQL yıldız şema ve özet katman → ASP.NET Core API → Next.js dashboard |
-| **Kalite** | 255 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
+| **Kalite** | 256 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
 
 ## Öne çıkan bulgular
 
 | Bulgu | Değer |
 |---|---|
-| 2024'te hafta içi akşam zirvesi 2023'e göre hızlandı, karşılaştırılan 12 ayın hepsinde | 45,7 → 47,4 km/sa |
-| İş günü başına şehrin gece hızının dörtte üçünün altında aktığı saat sayısı azaldı | 10,1 → 7,4 saat |
-| Ama hücre bazında tablo farklı: medyan hücre yerinde sayıyor, hücrelerin %28,5'i yavaşladı | Medyan −0,2 km/sa |
+| Araç ağırlıklı şehir ortalamasına göre 2024'te akşamlar 12 ayın 12'sinde hızlandı | 45,7 → 47,4 km/sa |
+| Ama hücre ağırlıkları 2023'e sabitlenince bu hızlanma kayboluyor: 12 ayın yalnızca 2'sinde hızlanma var | 45,6 → 45,2 km/sa |
+| Medyan hücre de aynı sonucu veriyor; hücre bazında son 12 ayda hücrelerin %28,5'i 1 km/sa'ten fazla yavaşladı | 44,8 → 44,4 km/sa |
 | Yaz tatilinde sabah zirvesi okul dönemine göre daha rahat | +4,9 km/sa |
 | Ramazan'da akşam hacmi 18:00 yerine 17:00'de zirve yapar, iftar saatinde düşer | Zirveye göre −%10,8 |
 | 2024 Ramazan Bayramı'nda gündüz trafik hacmi olağan günlerin yarısına indi | −%54,5 |
 | Haftanın en yavaş saati | Çarşamba 18:00, 43,9 km/sa |
 | En öngörülemez saat: iyi ve kötü günler arasındaki fark en büyük | 08:00, 43,7-51,3 km/sa |
-| Şubat 2024'te hücre başına araç bir ayda sıçradı, hızda karşılığı yok: İBB'nin sayım düzeyi değişti | +%34,6 |
+| 24 Ocak 2024'te hücre başına araç bir günde 1,7 katına çıktı, hızda karşılığı yok: İBB'nin sayım düzeyi değişti | 73 → 123 araç |
 
-Son bulgu veri kalitesi açısından önemlidir. Dashboard bu kırılmayı veriden tespit eder ve kırılmanın iki yanındaki dönemler arasında hacim karşılaştırmasını göstermez. Şehir ortalaması ile medyan hücre arasındaki ayrışma da raporda ayrıca işaretlenir, çünkü araç ağırlıklı ortalamadaki artış tek başına "trafik rahatladı" diye okunmamalıdır.
+İlk iki satır projenin en önemli bulgusudur. Şehir ortalaması araç sayısıyla ağırlıklandırılır ve Ocak 2024'teki sayım değişikliği bu ağırlıkları kaydırdı. Hücrelerin hızı yerinde sayarken ortalamanın yükselmesi, sayım artışının en çok hızlı yollarda olduğunu ve bu yolların ortalamadaki payının büyüdüğünü düşündürür. Bu yüzden rapor yıllık karşılaştırmayı üç ölçüyle gösterir: araç ağırlıklı, ilk yılın araç paylarıyla sabit ağırlıklı ve medyan hücre. Sonuç: veriye göre 2024'te İstanbul'un akşam trafiği rahatlamadı. Dashboard sayım kırılmasını veriden tespit eder ve kırılmanın iki yanı arasında hacim karşılaştırmaz. Ayrıntılı hesap [uzun dönem notebook'undadır](notebooks/02_long_term_trends.ipynb).
 
 Bulguların tamamı dashboard'daki 12 bölümlük [analiz raporundadır](docs/dashboard.md#analiz-raporu-bölümleri). Rapor metni veriden hesaplanır, yeni bir ay yüklendiğinde kendiliğinden güncellenir.
 
@@ -183,7 +183,7 @@ Ayrıntılar: [Dashboard dokümanı](docs/dashboard.md)
 | Bileşen | Araç | Test |
 |---|---|---:|
 | ETL | pytest, geçici PostgreSQL veritabanları | 94 |
-| Backend | xUnit v3, Testcontainers | 84 |
+| Backend | xUnit v3, Testcontainers | 85 |
 | Frontend | Vitest | 77 |
 
 GitHub Actions her push ve pull request'te üç test grubunu, lint ve tip kontrolünü, üretim derlemesini ve üç Docker imajının derlenmesini çalıştırır.

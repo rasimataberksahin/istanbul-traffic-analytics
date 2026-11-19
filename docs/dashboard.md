@@ -34,7 +34,7 @@ Her gösterge ve grafik kartının sağ üst köşesinde bir "i" düğmesi vard�
 |---:|---|---|
 | 1 | Dönemin özeti | Yıllık göstergeler ve otomatik bulgular |
 | 2 | Aylar boyunca hız | Gece, gün geneli, sabah ve akşam zirvesi çizgileri |
-| 3 | Yıllık karşılaştırma | Aynı ayın iki yılı ve aylık fark çubukları |
+| 3 | Yıllık karşılaştırma | Aynı ayın iki yılı, aylık fark çubukları ve yıllık farkın üç ağırlıkla (araç ağırlıklı, sabit ağırlık, medyan hücre) karşılaştırması |
 | 4 | Tıkanıklık ve yoğun saatler | Aylık tıkanıklık endeksi ve iş günü başına yoğun saat |
 | 5 | Ay ve saate göre hız | Ay x saat ısı haritası |
 | 6 | Haftanın günleri | Gün x saat ısı haritası |
@@ -75,6 +75,7 @@ Rapordaki bulgu kutuları sabit metin değildir. [`src/lib/insights.ts`](../fron
 | Basit ortalama yoğun saatleri hızlı gösteriyor | Ana metrik araç ağırlıklı ortalamadır |
 | Her saatte veri gönderen hücre sayısı değişiyor | Hacim, toplam araç yerine hücre ve saat başına ortalama araçla karşılaştırılır |
 | Mevsim etkisi yıllık farkı gizleyebilir | Yıllık karşılaştırma aynı ayın iki yılı arasında yapılır |
+| Sayım değişikliği araç ağırlıklarını kaydırır | Yıllık akşam farkı ayrıca sabit ağırlıkla (her hücrenin ilk yüklenen yıldaki akşam araç payı) ve medyan hücreyle hesaplanır |
 | Bölgesel değişim hücre karışımından etkilenebilir | Her hücre kendi geçmişiyle kıyaslanır |
 | Takvim renkleri tek bir aya göre ayarlanırsa yanıltır | Takvim renk sınıfları tüm iş günlerinin dağılımından hesaplanır |
 

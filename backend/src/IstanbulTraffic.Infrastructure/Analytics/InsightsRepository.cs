@@ -51,6 +51,34 @@ internal sealed class InsightsRepository(NpgsqlDataSource dataSource) : IInsight
                     HAVING COUNT(*) >= @MinimumHoursPerDay
                 ) AS days
                 GROUP BY month
+            ),
+            cell_month AS (
+                -- Weekday evening peak of every cell and month; low-sample rows are already excluded.
+                SELECT
+                    date_trunc('month', d.date_key)::date AS month,
+                    d.location_id,
+                    SUM(d.peak_speed_volume)::numeric / SUM(d.peak_vehicles) AS speed,
+                    SUM(d.peak_vehicles)                                      AS vehicles
+                FROM traffic.agg_location_daily AS d
+                WHERE d.peak_vehicles > 0
+                GROUP BY 1, 2
+            ),
+            base_weight AS (
+                -- Each cell keeps its share of evening vehicles in the first loaded year, so a change
+                -- in how vehicles are counted cannot shift the weights between months.
+                SELECT location_id, SUM(vehicles)::numeric AS weight
+                FROM cell_month
+                WHERE month < (SELECT MIN(month) FROM cell_month) + make_interval(months => @BaseWeightMonths)
+                GROUP BY location_id
+            ),
+            cell_evening AS (
+                SELECT
+                    c.month,
+                    SUM(c.speed * b.weight) / NULLIF(SUM(b.weight), 0)          AS fixed_weight,
+                    percentile_cont(0.5) WITHIN GROUP (ORDER BY c.speed)        AS median_cell
+                FROM cell_month AS c
+                LEFT JOIN base_weight AS b USING (location_id)
+                GROUP BY c.month
             )
             SELECT
                 m.month,
@@ -67,10 +95,13 @@ internal sealed class InsightsRepository(NpgsqlDataSource dataSource) : IInsight
                 ROUND(m.evening, 2)               AS evening_peak_speed_kmh,
                 ROUND(m.night, 2)                 AS night_speed_kmh,
                 ROUND(1 - m.evening / NULLIF(m.night, 0), 3) AS congestion_index,
-                ROUND(c.per_day, 1)               AS congested_hours_per_weekday
+                ROUND(c.per_day, 1)               AS congested_hours_per_weekday,
+                ROUND(e.fixed_weight, 2)          AS fixed_weight_evening_speed_kmh,
+                ROUND(e.median_cell::numeric, 2)  AS median_cell_evening_speed_kmh
             FROM monthly AS m
             LEFT JOIN traffic.load_audit AS a ON a.month = m.month
             LEFT JOIN congested AS c ON c.month = m.month
+            LEFT JOIN cell_evening AS e ON e.month = m.month
             ORDER BY m.month
             """;
 
@@ -84,6 +115,7 @@ internal sealed class InsightsRepository(NpgsqlDataSource dataSource) : IInsight
             NightEnd = (short)TrafficRules.NightEndHour,
             CongestedRatio = TrafficRules.CongestedSpeedRatio,
             TrafficRules.MinimumHoursPerDay,
+            TrafficRules.BaseWeightMonths,
         });
         return QueryAsync<MonthlyInsight>(Sql, parameters, cancellationToken);
     }
