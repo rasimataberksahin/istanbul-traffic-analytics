@@ -1,5 +1,7 @@
 # Istanbul Traffic Analytics
 
+[![CI](https://github.com/rasimataberksahin/istanbul-traffic-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/rasimataberksahin/istanbul-traffic-analytics/actions/workflows/ci.yml)
+
 İBB açık verisindeki saatlik trafik ölçümlerini indiren, temizleyen, PostgreSQL'de modelleyen, .NET API ile sunan ve Next.js arayüzünde analiz eden uçtan uca veri projesi.
 
 ![Analiz raporu](docs/screenshots/analysis-report.png)
