@@ -53,12 +53,12 @@ export default async function GuidePage() {
       icon: Article,
       title: t("Analiz raporu", "Analysis report"),
       text: t(
-        "Yüklenen tüm ayları kapsayan 12 bölümlük uzun rapor. Metindeki bulgular veriden hesaplanır, yeni ay geldiğinde kendiliğinden değişir.",
-        "A 12-section report over every loaded month. The findings are computed from the data and change by themselves when a new month arrives.",
+        "Yüklenen tüm ayları kapsayan 13 bölümlük uzun rapor. Metindeki bulgular veriden hesaplanır, yeni ay geldiğinde kendiliğinden değişir.",
+        "A 13-section report over every loaded month. The findings are computed from the data and change by themselves when a new month arrives.",
       ),
       items: [
         t("Aylık ve yıllık trend, mevsimsellik", "Monthly and yearly trends, seasonality"),
-        t("Okul, tatil, Ramazan ve bayram etkileri", "School, break, Ramadan and holiday effects"),
+        t("Okul, tatil, Ramazan, bayram ve hava durumu etkileri", "School, break, Ramadan, holiday and weather effects"),
         t("Öngörülebilirlik ve bölgesel değişim haritası", "Predictability and a map of change by area"),
       ],
     },

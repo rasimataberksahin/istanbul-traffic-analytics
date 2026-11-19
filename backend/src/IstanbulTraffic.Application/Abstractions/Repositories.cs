@@ -46,6 +46,8 @@ public interface IInsightsRepository
     Task<IReadOnlyList<ReliabilityPoint>> GetReliabilityAsync(CancellationToken cancellationToken);
 
     Task<LocationChangeReport> GetLocationChangesAsync(CancellationToken cancellationToken);
+
+    Task<WeatherReport> GetWeatherAsync(CancellationToken cancellationToken);
 }
 
 public interface IPipelineSnapshotReader

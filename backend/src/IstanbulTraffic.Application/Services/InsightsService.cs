@@ -44,4 +44,7 @@ public sealed class InsightsService(IInsightsRepository repository)
 
     public Task<LocationChangeReport> GetLocationChangesAsync(CancellationToken cancellationToken) =>
         repository.GetLocationChangesAsync(cancellationToken);
+
+    public Task<WeatherReport> GetWeatherAsync(CancellationToken cancellationToken) =>
+        repository.GetWeatherAsync(cancellationToken);
 }

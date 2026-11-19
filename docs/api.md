@@ -69,6 +69,7 @@ Bu uçlar filtre almaz ve yüklenen tüm ayları kapsar. Hepsi özet katmandan o
 | GET | `/api/v1/insights/holidays` | Her resmî tatilin çevresindeki aynı günlere göre hız ve hacim farkı |
 | GET | `/api/v1/insights/reliability` | Saat bazında günlük hızın 10, 25, 50, 75 ve 90. yüzdelikleri |
 | GET | `/api/v1/insights/location-changes` | Son 12 ay ile önceki 12 ayın hücre bazında akşam zirvesi farkı |
+| GET | `/api/v1/insights/weather` | Hafif yağmur, kuvvetli yağmur ve karın hız ve hacme etkisi; saatlik etki, ilçelerin yağmur hassasiyeti, en yağışlı akşamlar |
 
 Hacim, toplam araç yerine hücre ve saat başına ortalama araçla verilir, çünkü her saatte veri gönderen hücre sayısı 1.204 ile 2.434 arasında değişir. Bölgesel değişimde bir hücre, her iki dönemde de en iyi ölçülen hücrenin akşam saatlerinin en az yarısı kadar ölçülmüşse karşılaştırılır.
 

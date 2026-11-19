@@ -38,6 +38,18 @@ public static class TrafficRules
 
     /// <summary>Months at the start of the data whose evening vehicle shares fix the cell weights.</summary>
     public const int BaseWeightMonths = 12;
+
+    /// <summary>Hourly rain (mm) from which an hour counts as rainy, and as heavy rain.</summary>
+    public const decimal LightRainMm = 0.1m;
+    public const decimal HeavyRainMm = 1.0m;
+
+    /// <summary>Rain over the 17:00-19:59 window (mm) from which a weekday evening counts as wet.</summary>
+    public const decimal WetEveningMm = 1.0m;
+
+    /// <summary>Wet evenings a cell needs before it enters the district rain ranking.</summary>
+    public const int MinimumWetEvenings = 6;
+
+    public const int MinimumDistrictCells = 5;
     public const int MinimumComparisonPeakHours = 60;
 
     /// <summary>

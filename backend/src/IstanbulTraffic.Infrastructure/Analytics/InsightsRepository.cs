@@ -398,6 +398,171 @@ internal sealed class InsightsRepository(NpgsqlDataSource dataSource) : IInsight
         return new LocationChangeReport(window.CurrentFrom, window.CurrentTo, window.PreviousFrom, window.PreviousTo, rows.AsList());
     }
 
+    public async Task<WeatherReport> GetWeatherAsync(CancellationToken cancellationToken)
+    {
+        // Weekday, non-holiday, fully measured hours with their weather class and the dry baseline
+        // of the same month and hour.
+        const string HoursCte = $"""
+            WITH hours AS (
+                SELECT
+                    f.observed_at,
+                    f.hour_of_day,
+                    date_trunc('month', f.observed_at) AS month,
+                    f.speed_volume::numeric / f.vehicle_count   AS speed,
+                    f.vehicle_count::numeric / f.eligible_row_count AS vehicles,
+                    CASE
+                        WHEN w.snowfall_cm > 0 THEN 'snow'
+                        WHEN w.precipitation_mm >= @HeavyRainMm THEN 'heavy_rain'
+                        WHEN w.precipitation_mm >= @LightRainMm THEN 'light_rain'
+                        ELSE 'dry'
+                    END AS condition
+                FROM traffic.agg_city_hourly AS f
+                JOIN traffic.weather_hourly AS w USING (observed_at)
+                WHERE f.vehicle_count > 0 AND f.eligible_row_count > 0 AND NOT f.is_partial_hour AND {Workday}
+            ),
+            baseline AS (
+                SELECT month, hour_of_day, AVG(speed) AS speed, AVG(vehicles) AS vehicles
+                FROM hours
+                WHERE condition = 'dry'
+                GROUP BY month, hour_of_day
+            ),
+            compared AS (
+                SELECT h.*, h.speed - b.speed AS speed_change, h.vehicles / NULLIF(b.vehicles, 0) - 1 AS volume_change
+                FROM hours AS h
+                JOIN baseline AS b USING (month, hour_of_day)
+            )
+            """;
+
+        const string ConditionsSql = HoursCte + """
+            SELECT
+                condition,
+                COUNT(*)::int AS hours,
+                COUNT(*) FILTER (WHERE hour_of_day BETWEEN @EveningStart AND @EveningEnd)::int AS evening_hours,
+                ROUND(AVG(speed), 2)        AS average_speed_kmh,
+                ROUND(AVG(speed_change), 2) AS speed_change_kmh,
+                ROUND(AVG(speed_change) FILTER (WHERE hour_of_day BETWEEN @EveningStart AND @EveningEnd), 2) AS evening_speed_change_kmh,
+                ROUND(100 * AVG(volume_change), 1) AS volume_change_pct
+            FROM compared
+            GROUP BY condition
+            ORDER BY array_position(ARRAY['dry', 'light_rain', 'heavy_rain', 'snow'], condition)
+            """;
+
+        const string HourlySql = HoursCte + """
+            SELECT
+                hour_of_day::int AS hour_of_day,
+                COUNT(*) FILTER (WHERE condition IN ('light_rain', 'heavy_rain'))::int AS rain_hours,
+                ROUND(AVG(speed_change) FILTER (WHERE condition IN ('light_rain', 'heavy_rain')), 2) AS speed_change_kmh
+            FROM compared
+            GROUP BY hour_of_day
+            ORDER BY hour_of_day
+            """;
+
+        const string EveningCte = """
+            WITH evening_weather AS (
+                SELECT observed_at::date AS date_key, SUM(precipitation_mm) AS rain, SUM(snowfall_cm) AS snow
+                FROM traffic.weather_hourly
+                WHERE EXTRACT(HOUR FROM observed_at) BETWEEN @EveningStart AND @EveningEnd
+                GROUP BY 1
+            ),
+            """;
+
+        const string DistrictsSql = EveningCte + """
+            days AS (
+                -- Peak sums in agg_location_daily already exclude weekends, holidays and low-sample rows.
+                SELECT
+                    d.location_id,
+                    date_trunc('month', d.date_key) AS month,
+                    d.peak_speed_volume::numeric / d.peak_vehicles AS speed,
+                    d.peak_vehicles AS vehicles,
+                    CASE WHEN e.rain >= @WetEveningMm THEN 'wet' WHEN e.rain = 0 AND e.snow = 0 THEN 'dry' END AS kind
+                FROM traffic.agg_location_daily AS d
+                JOIN evening_weather AS e USING (date_key)
+                WHERE d.peak_vehicles > 0
+            ),
+            cell_month AS (
+                SELECT
+                    location_id,
+                    month,
+                    SUM(speed * vehicles) FILTER (WHERE kind = 'wet') / NULLIF(SUM(vehicles) FILTER (WHERE kind = 'wet'), 0) AS wet,
+                    SUM(speed * vehicles) FILTER (WHERE kind = 'dry') / NULLIF(SUM(vehicles) FILTER (WHERE kind = 'dry'), 0) AS dry,
+                    COUNT(*) FILTER (WHERE kind = 'wet') AS wet_days,
+                    SUM(vehicles) FILTER (WHERE kind = 'dry') AS dry_vehicles
+                FROM days
+                GROUP BY location_id, month
+            ),
+            cells AS (
+                SELECT location_id, SUM((wet - dry) * dry_vehicles) AS change_volume, SUM(dry_vehicles) AS weight
+                FROM cell_month
+                WHERE wet IS NOT NULL AND dry IS NOT NULL
+                GROUP BY location_id
+                HAVING SUM(wet_days) >= @MinimumWetEvenings
+            )
+            SELECT
+                l.district,
+                COUNT(*)::int AS cells,
+                ROUND(SUM(c.change_volume) / SUM(c.weight), 2) AS speed_change_kmh
+            FROM cells AS c
+            JOIN traffic.dim_location AS l USING (location_id)
+            WHERE l.district IS NOT NULL
+            GROUP BY l.district
+            HAVING COUNT(*) >= @MinimumDistrictCells
+            ORDER BY speed_change_kmh, l.district
+            """;
+
+        const string EveningsSql = EveningCte + $"""
+            evenings AS (
+                SELECT
+                    f.date_key,
+                    SUM(f.speed_volume)::numeric / NULLIF(SUM(f.vehicle_count), 0) AS speed
+                FROM traffic.agg_city_hourly AS f
+                WHERE f.vehicle_count > 0 AND {Workday} AND f.hour_of_day BETWEEN @EveningStart AND @EveningEnd
+                GROUP BY f.date_key
+                HAVING COUNT(*) = @EveningHours
+            ),
+            dry_month AS (
+                SELECT date_trunc('month', v.date_key) AS month, AVG(v.speed) AS speed
+                FROM evenings AS v
+                JOIN evening_weather AS e USING (date_key)
+                WHERE e.rain = 0 AND e.snow = 0
+                GROUP BY 1
+            )
+            SELECT
+                v.date_key AS date,
+                d.day_name,
+                ROUND(e.rain, 2)               AS precipitation_mm,
+                ROUND(e.snow, 2)               AS snowfall_cm,
+                ROUND(v.speed, 2)              AS evening_speed_kmh,
+                ROUND(v.speed - m.speed, 2)    AS speed_change_kmh
+            FROM evenings AS v
+            JOIN evening_weather AS e USING (date_key)
+            JOIN traffic.dim_date AS d USING (date_key)
+            LEFT JOIN dry_month AS m ON m.month = date_trunc('month', v.date_key)
+            WHERE e.rain > 0 OR e.snow > 0
+            ORDER BY e.rain + e.snow * 10 DESC, v.date_key
+            LIMIT @WettestEvenings
+            """;
+
+        var parameters = new DynamicParameters(new
+        {
+            TrafficRules.LightRainMm,
+            TrafficRules.HeavyRainMm,
+            TrafficRules.WetEveningMm,
+            TrafficRules.MinimumWetEvenings,
+            TrafficRules.MinimumDistrictCells,
+            EveningStart = (short)TrafficRules.EveningPeakStartHour,
+            EveningEnd = (short)TrafficRules.EveningPeakEndHour,
+            EveningHours = TrafficRules.EveningPeakEndHour - TrafficRules.EveningPeakStartHour + 1,
+            WettestEvenings = 10,
+        });
+
+        await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
+        var conditions = await connection.QueryAsync<WeatherCondition>(new CommandDefinition(ConditionsSql, parameters, cancellationToken: cancellationToken));
+        var hourly = await connection.QueryAsync<WeatherHourEffect>(new CommandDefinition(HourlySql, parameters, cancellationToken: cancellationToken));
+        var districts = await connection.QueryAsync<DistrictRainEffect>(new CommandDefinition(DistrictsSql, parameters, cancellationToken: cancellationToken));
+        var evenings = await connection.QueryAsync<WetEvening>(new CommandDefinition(EveningsSql, parameters, cancellationToken: cancellationToken));
+        return new WeatherReport(conditions.AsList(), hourly.AsList(), districts.AsList(), evenings.AsList());
+    }
+
     private async Task<IReadOnlyList<T>> QueryAsync<T>(string sql, DynamicParameters parameters, CancellationToken cancellationToken)
     {
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);

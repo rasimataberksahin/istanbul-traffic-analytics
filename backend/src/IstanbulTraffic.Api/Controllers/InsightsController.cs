@@ -50,4 +50,9 @@ public sealed class InsightsController(InsightsService service) : ControllerBase
     [HttpGet("location-changes")]
     public Task<LocationChangeReport> GetLocationChanges(CancellationToken cancellationToken) =>
         service.GetLocationChangesAsync(cancellationToken);
+
+    /// <summary>Effect of rain and snow on speed and volume, by condition, hour and district.</summary>
+    [HttpGet("weather")]
+    public Task<WeatherReport> GetWeather(CancellationToken cancellationToken) =>
+        service.GetWeatherAsync(cancellationToken);
 }

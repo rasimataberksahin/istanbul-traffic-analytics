@@ -44,6 +44,18 @@ python -m traffic_etl.place_names apply   # adları veritabanına yazar
 - Merkezi denize düşen hücreler (köprüler, sahil yolları) 1,5 km içindeki en yakın adlandırılmış hücrenin adını alır. Dosyanın `source` sütunu bunu `nearest` olarak işaretler.
 - Mahalle adlarındaki "Mahallesi" eki atılır. Adlar © OpenStreetMap katkıcıları, ODbL lisansıyla.
 
+## Hava durumu
+
+[`traffic_etl.weather`](../etl/src/traffic_etl/weather.py), Open-Meteo'nun geçmiş hava arşivinden (ERA5 tabanlı, CC BY 4.0) saatlik sıcaklık, yağış, kar ve hava kodunu çeker ve `traffic.weather_hourly` tablosuna yazar. `traffic_etl.run` yüklediği ayların havasını kendiliğinden çeker; `--skip-weather` ile atlanabilir, servis yanıt vermezse trafik yüklemesi yine tamamlanır.
+
+```bash
+python -m traffic_etl.weather            # yüklü tüm aylar
+```
+
+- Değerler şehrin üç noktasının (Avcılar, Fatih, Kadıköy-Ataşehir) ortalamasıdır. Hava kodu en kötü noktanınkidir.
+- Open-Meteo yağışı, zaman damgasıyla biten saat için verir. Yükleyici değeri bir saat geri kaydırır: `observed_at` 18:00, 18:00-18:59 arasındaki yağışı taşır ve trafik satırlarıyla aynı saati anlatır.
+- Bir noktanın değeri eksik olan saatler tahminle doldurulmaz, atlanır.
+
 ## Tasarım ilkeleri
 
 | İlke | Uygulama |

@@ -27,6 +27,7 @@ import {
   getMonthlyInsights,
   getPeriodProfiles,
   getReliability,
+  getWeather,
 } from "@/lib/api";
 import { formatHour, makeFormat } from "@/lib/format";
 import { translator } from "@/lib/i18n/locale";
@@ -102,6 +103,7 @@ export default async function AnalysisPage() {
     { id: "takvim", title: t("Takvim", "Calendar") },
     { id: "donemler", title: t("Okul, tatil, Ramazan", "School, holidays, Ramadan") },
     { id: "tatiller", title: t("Resmî tatiller", "Public holidays") },
+    { id: "hava", title: t("Hava durumu", "Weather") },
     { id: "guvenilirlik", title: t("Öngörülebilirlik", "Predictability") },
     { id: "konum-degisimi", title: t("Bölgesel değişim", "Change by area") },
     { id: "veri-kapsami", title: t("Veri kapsamı ve yöntem", "Coverage and method") },
@@ -154,7 +156,7 @@ export default async function AnalysisPage() {
     );
   }
 
-  const [monthly, monthHour, dayOfWeek, calendar, periods, holidays, reliability, changes] = await Promise.all([
+  const [monthly, monthHour, dayOfWeek, calendar, periods, holidays, reliability, changes, weather] = await Promise.all([
     getMonthlyInsights(),
     getMonthHour(),
     getDayOfWeekHour(),
@@ -163,6 +165,7 @@ export default async function AnalysisPage() {
     getHolidayEffects(),
     getReliability(),
     getLocationChanges(),
+    getWeather(),
   ]);
 
   if (monthly.length === 0) {
@@ -290,6 +293,30 @@ export default async function AnalysisPage() {
   const medianChange = located.length ? [...located].sort((a, b) => a.speedChangeKmh - b.speedChangeKmh)[Math.floor(located.length / 2)]?.speedChangeKmh ?? null : null;
   const worsened = located.slice(0, 10);
   const improved = [...located].reverse().slice(0, 10);
+
+  // Weather.
+  const condition = (kind: string) => weather.conditions.find((item) => item.condition === kind);
+  const lightRain = condition("light_rain");
+  const heavyRain = condition("heavy_rain");
+  const snow = condition("snow");
+  const rainHours = (lightRain?.hours ?? 0) + (heavyRain?.hours ?? 0);
+  const rainSensitive = weather.districts.slice(0, 10);
+  const rainResilient = [...weather.districts].reverse().slice(0, 3);
+  const worstRainHour = weather.hourly.reduce<(typeof weather.hourly)[number] | null>(
+    (worst, point) =>
+      point.speedChangeKmh !== null && point.rainHours >= 20 && (worst === null || point.speedChangeKmh < (worst.speedChangeKmh ?? 0))
+        ? point
+        : worst,
+    null,
+  );
+  const conditionTile = (item: typeof lightRain, label: string, note: string, info: string) => (
+    <StatTile
+      info={info}
+      label={label}
+      note={item ? t(`${formatInteger(item.hours)} saat · ${note}`, `${formatInteger(item.hours)} hours · ${note}`) : note}
+      value={item?.speedChangeKmh == null ? noData : `${formatSigned(item.speedChangeKmh)} ${speedUnit}`}
+    />
+  );
 
   const lowestCoverage = monthly.reduce((a, b) => (b.coveragePct < a.coveragePct ? b : a));
   const volumeBreak = findVolumeBreak(monthly);
@@ -1004,12 +1031,188 @@ export default async function AnalysisPage() {
           </ReportSection>
 
           <ReportSection
+            id="hava"
+            lead={t(
+              "Her yağışlı hafta içi saati, aynı ayın aynı saatindeki kuru saatlerle karşılaştırılır. Böylece mevsim, günün saati ve sayım düzeyindeki değişim sonucu etkilemez. Hava verisi şehrin üç noktasının (Avcılar, Fatih, Kadıköy) ortalamasıdır.",
+              "Every wet weekday hour is compared with the dry hours of the same month and hour of day, so season, time of day and the counting level do not affect the result. Weather is the mean of three points across the city (Avcılar, Fatih, Kadıköy).",
+            )}
+            number={10}
+            title={t("Yağmur ve kar trafiği ne kadar yavaşlatıyor?", "How much do rain and snow slow traffic?")}
+          >
+            {weather.conditions.length === 0 ? (
+              <EmptyState
+                title={t("Hava verisi yüklenmedi", "No weather data loaded")}
+                message={t(
+                  "Bu bölüm için python -m traffic_etl.weather komutuyla Open-Meteo'dan saatlik hava verisini yükleyin.",
+                  "Load hourly weather from Open-Meteo with python -m traffic_etl.weather to fill this section.",
+                )}
+              />
+            ) : (
+              <>
+                <section className="stats" aria-label={t("Hava koşullarının etkisi", "Effect of weather")}>
+                  {conditionTile(
+                    lightRain,
+                    t("Hafif yağmur", "Light rain"),
+                    t("saatte 0,1-1 mm", "0.1-1 mm per hour"),
+                    t(
+                      "Saatte 0,1 ile 1 mm arası yağış olan hafta içi saatlerde şehir hızının, aynı ayın aynı saatindeki kuru saatlere göre ortalama farkı.",
+                      "The average difference in city speed between weekday hours with 0.1 to 1 mm of rain and dry hours of the same month and hour.",
+                    ),
+                  )}
+                  {conditionTile(
+                    heavyRain,
+                    t("Kuvvetli yağmur", "Heavy rain"),
+                    t("saatte 1 mm ve üstü", "1 mm per hour or more"),
+                    t(
+                      "Saatte en az 1 mm yağış olan saatler. Bu, şemsiyesiz dışarı çıkılamayacak bir yağmurdur.",
+                      "Hours with at least 1 mm of rain, the kind of rain you cannot go out in without an umbrella.",
+                    ),
+                  )}
+                  {conditionTile(
+                    snow,
+                    t("Kar", "Snow"),
+                    t("kar yağışı olan saatler", "hours with snowfall"),
+                    t(
+                      "Kar yağan saatler az olduğu için bu değer yağmura göre daha belirsizdir. Karlı akşamlarda birçok kişi yola hiç çıkmadığından akşam etkisi farklı yönde olabilir.",
+                      "There are few snowy hours, so this value is less certain than rain. On snowy evenings many people stay home, so the evening effect can point the other way.",
+                    ),
+                  )}
+                  <StatTile
+                    info={t(
+                      "Yağışlı saatlerde bir hücreden geçen araç sayısının kuru saatlere göre değişimi. Değer sıfıra yakınsa insanlar yağmurda da yola çıkıyor, ama daha yavaş gidiyor demektir.",
+                      "The change in vehicles per cell in wet hours against dry hours. A value near zero means people still drive in the rain, just more slowly.",
+                    )}
+                    label={t("Kuvvetli yağmurda araç sayısı", "Vehicles in heavy rain")}
+                    note={t("kuru saatlere göre", "against dry hours")}
+                    value={heavyRain?.volumeChangePct == null ? noData : formatSignedPercent(heavyRain.volumeChangePct)}
+                  />
+                </section>
+                <div className="grid">
+                  <ChartCard
+                    className="span-8"
+                    info={t(
+                      "Her saat için, o saatte yağmur yağan günlerin kuru günlere göre hız farkı. Çizgi sıfırın ne kadar altındaysa yağmur o saatte trafiği o kadar yavaşlatır. Gece saatlerinde araç az olduğu için fark yoğunluktan değil, sürüşün yavaşlamasından gelir.",
+                      "For each hour, the speed difference between rainy and dry days at that hour. The further below zero, the more rain slows traffic at that hour. At night there is little traffic, so the difference comes from slower driving rather than congestion.",
+                    )}
+                    subtitle={t(
+                      `Yağmurlu hafta içi saatlerin kuru saatlere göre farkı (${speedUnit}), ${formatInteger(rainHours)} yağmurlu saat`,
+                      `Rainy weekday hours against dry hours (${speedUnit}), ${formatInteger(rainHours)} rainy hours`,
+                    )}
+                    table={
+                      <DataTable
+                        columns={[hourCol, t("Yağmurlu saat", "Rainy hours"), t(`Fark (${speedUnit})`, `Change (${speedUnit})`)]}
+                        rows={weather.hourly.map((point) => [
+                          formatHour(point.hourOfDay),
+                          formatInteger(point.rainHours),
+                          point.speedChangeKmh === null ? "-" : formatSigned(point.speedChangeKmh),
+                        ])}
+                      />
+                    }
+                    title={t("Yağmur saat saat", "Rain hour by hour")}
+                  >
+                    <SeriesChart
+                      ariaLabel={t("Saatlere göre yağmurun hıza etkisi", "Effect of rain on speed by hour")}
+                      labels={HOURS.map(formatHour)}
+                      series={[
+                        {
+                          id: "rain",
+                          label: t("Yağmurlu saatlerde hız farkı", "Speed change in rainy hours"),
+                          color: "var(--series-1)",
+                          values: HOURS.map((hour) => weather.hourly.find((point) => point.hourOfDay === hour)?.speedChangeKmh ?? null),
+                        },
+                      ]}
+                      ticks={HOUR_TICKS}
+                      unit="speed"
+                    />
+                  </ChartCard>
+                  <div className="span-4 stack">
+                    {heavyRain?.speedChangeKmh != null && heavyRain.volumeChangePct != null ? (
+                      <Finding
+                        title={t(
+                          `Kuvvetli yağmur şehri ${formatSigned(heavyRain.speedChangeKmh)} km/sa yavaşlatıyor`,
+                          `Heavy rain slows the city by ${formatSigned(heavyRain.speedChangeKmh)} km/h`,
+                        )}
+                      >
+                        {t(
+                          `Araç sayısı ise neredeyse aynı kalıyor (${formatSignedPercent(heavyRain.volumeChangePct)}). İstanbullular yağmurda yolculuktan vazgeçmiyor, aynı trafikte daha yavaş ilerliyor.`,
+                          `The number of vehicles barely changes (${formatSignedPercent(heavyRain.volumeChangePct)}). People in Istanbul do not cancel trips in the rain; the same traffic simply moves more slowly.`,
+                        )}
+                      </Finding>
+                    ) : null}
+                    {worstRainHour ? (
+                      <Finding title={t(`Yağmur en çok ${formatHour(worstRainHour.hourOfDay)}'de etkiliyor`, `Rain hurts most at ${formatHour(worstRainHour.hourOfDay)}`)}>
+                        {t(
+                          `Bu saatte yağmurlu günler kuru günlere göre ${formatSigned(worstRainHour.speedChangeKmh ?? 0)} km/sa daha yavaş. Yoğun saatlerde yollar kapasitesine yakın çalıştığı için küçük bir yavaşlama kuyruğa dönüşür.`,
+                          `At this hour rainy days are ${formatSigned(worstRainHour.speedChangeKmh ?? 0)} km/h slower than dry days. In the rush hours roads run close to capacity, so a small slowdown turns into a queue.`,
+                        )}
+                      </Finding>
+                    ) : null}
+                  </div>
+                  {rainSensitive.length > 0 ? (
+                    <ChartCard
+                      className="span-6"
+                      info={t(
+                        "Her hücrenin yağışlı hafta içi akşamlarındaki (17:00-19:59 arası en az 1 mm) hızı, aynı ayın kuru akşamlarıyla karşılaştırılır ve ilçe içinde araç sayısıyla ağırlıklandırılır. En az 6 yağışlı akşamı ölçülen hücreler ve en az 5 hücresi olan ilçeler sayılır.",
+                        "Each cell's speed on wet weekday evenings (at least 1 mm between 17:00 and 19:59) is compared with dry evenings of the same month and weighted by vehicles within the district. Cells need at least 6 measured wet evenings and districts at least 5 cells.",
+                      )}
+                      subtitle={t(
+                        `Yağışlı akşamlarda akşam zirvesi hızının kuru akşamlara göre farkı (${speedUnit})`,
+                        `Evening peak speed on wet evenings against dry evenings (${speedUnit})`,
+                      )}
+                      title={t("Yağmura en hassas ilçeler", "Districts most sensitive to rain")}
+                    >
+                      <DivergingBars
+                        items={rainSensitive.map((district) => ({
+                          label: district.district,
+                          note: t(`${district.cells} hücre`, `${district.cells} cells`),
+                          value: district.speedChangeKmh,
+                          display: formatSigned(district.speedChangeKmh),
+                        }))}
+                        negativeLabel={t("Daha yavaş", "Slower")}
+                        positiveLabel={t("Daha hızlı", "Faster")}
+                      />
+                      {rainResilient.length > 0 ? (
+                        <p className="card-subtitle" style={{ marginTop: 12 }}>
+                          {t(
+                            `En az etkilenenler: ${rainResilient.map((item) => `${item.district} (${formatSigned(item.speedChangeKmh)})`).join(", ")}. Zaten yavaş akan merkez ilçelerde yağmurun ekleyebileceği gecikme sınırlıdır.`,
+                            `Least affected: ${rainResilient.map((item) => `${item.district} (${formatSigned(item.speedChangeKmh)})`).join(", ")}. In central districts that already move slowly, rain has less room to add delay.`,
+                          )}
+                        </p>
+                      ) : null}
+                    </ChartCard>
+                  ) : null}
+                  <ChartCard
+                    className={rainSensitive.length > 0 ? "span-6" : "span-12"}
+                    info={t(
+                      "17:00-19:59 arasındaki yağışa göre sıralanmış hafta içi akşamları. Fark, o ayın kuru akşamlarının ortalamasına göredir.",
+                      "Weekday evenings ranked by rain between 17:00 and 19:59. The change is against the average dry evening of the same month.",
+                    )}
+                    subtitle={t("Hafta içi, 17:00-19:59 yağışı", "Weekdays, rain between 17:00 and 19:59")}
+                    title={t("En yağışlı 10 akşam", "The 10 wettest evenings")}
+                  >
+                    <DataTable
+                      columns={[t("Tarih", "Date"), t("Gün", "Day"), t("Yağış (mm)", "Rain (mm)"), t("Akşam hızı", "Evening speed"), t("Fark", "Change")]}
+                      rows={weather.wettestEvenings.map((evening) => [
+                        formatLongDate(evening.date),
+                        day(evening.dayName),
+                        formatDecimal(evening.precipitationMm) + (evening.snowfallCm ? t(` + ${formatDecimal(evening.snowfallCm)} cm kar`, ` + ${formatDecimal(evening.snowfallCm)} cm snow`) : ""),
+                        formatSpeed(evening.eveningSpeedKmh),
+                        evening.speedChangeKmh === null ? "-" : formatSigned(evening.speedChangeKmh),
+                      ])}
+                    />
+                  </ChartCard>
+                </div>
+              </>
+            )}
+          </ReportSection>
+
+          <ReportSection
             id="guvenilirlik"
             lead={t(
               "Ortalama hız bir saatin tipik durumunu anlatır, ama yolculuk planlarken kötü günler önemlidir. Bant ne kadar genişse o saatte trafiğin ne olacağını önceden kestirmek o kadar zordur.",
               "The average describes a typical hour, but bad days matter when you plan a trip. The wider the band, the harder it is to predict traffic at that hour.",
             )}
-            number={10}
+            number={11}
             title={t("Öngörülebilirlik", "Predictability")}
           >
             <div className="grid">
@@ -1069,7 +1272,7 @@ export default async function AnalysisPage() {
                   )
                 : t("Bu bölüm iki ayrı 12 aylık dönem yüklendiğinde dolar.", "This section fills in once two separate 12-month periods are loaded.")
             }
-            number={11}
+            number={12}
             title={t("Hangi bölgeler yavaşladı?", "Which areas got slower?")}
           >
             {located.length === 0 ? (
@@ -1170,7 +1373,7 @@ export default async function AnalysisPage() {
               "Analizlerin ne kadar güvenilir olduğu, verinin ne kadar eksiksiz olduğuna bağlıdır. Bu bölüm her ayın kapsamasını ve raporda kullanılan kuralları listeler.",
               "How far the analysis can be trusted depends on how complete the data is. This section lists each month's coverage and the rules used in the report.",
             )}
-            number={12}
+            number={13}
             title={t("Veri kapsamı ve yöntem", "Coverage and method")}
           >
             <div className="grid">
@@ -1254,6 +1457,12 @@ export default async function AnalysisPage() {
                     )}
                   </li>
                   <li>{t("Okul ve tatil tarihleri MEB çalışma takviminden, resmî tatiller ETL takviminden alınır.", "School and break dates come from the Ministry of Education calendar, public holidays from the ETL calendar.")}</li>
+                  <li>
+                    {t(
+                      "Hava verisi Open-Meteo'nun geçmiş hava arşivinden (CC BY 4.0) gelir ve şehrin üç noktasının ortalamasıdır; yerel sağanaklar bu ortalamada yumuşar.",
+                      "Weather comes from the Open-Meteo historical archive (CC BY 4.0) as the mean of three points across the city, so local showers are smoothed out.",
+                    )}
+                  </li>
                 </ul>
               </ChartCard>
             </div>

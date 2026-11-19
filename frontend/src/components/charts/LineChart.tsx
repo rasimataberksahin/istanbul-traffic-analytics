@@ -57,6 +57,13 @@ export function LineChart({
     return niceScale(Math.min(...values), Math.max(...values), 5);
   }, [series]);
 
+  // Half steps need a decimal so neighbouring ticks do not round to the same label.
+  const fractional = scale.ticks.some((tick) => !Number.isInteger(tick));
+  const formatTick = (tick: number) => {
+    const text = fractional ? f.formatDecimal(Math.abs(tick)) : f.formatInteger(Math.abs(tick));
+    return tick < 0 ? `−${text}` : text;
+  };
+
   const x = linearScale([0, lastIndex], [MARGIN.left, MARGIN.left + plotWidth]);
   const y = linearScale([scale.min, scale.max], [MARGIN.top + plotHeight, MARGIN.top]);
 
@@ -115,7 +122,7 @@ export function LineChart({
                 y2={y(tick)}
               />
               <text className="axis-text" dominantBaseline="middle" textAnchor="end" x={MARGIN.left - 8} y={y(tick)}>
-                {tick < 0 ? `−${f.formatInteger(-tick)}` : f.formatInteger(tick)}
+                {formatTick(tick)}
               </text>
             </g>
           ))}
@@ -133,7 +140,8 @@ export function LineChart({
           {(() => {
             // A single unbroken series gets a soft area under its line.
             const only = series.length === 1 && !pointColors ? series[0] : undefined;
-            if (!only || only.values.some((value) => value === null)) {
+            // An area only reads as an amount when it grows up from zero.
+            if (!only || scale.min < 0 || only.values.some((value) => value === null)) {
               return null;
             }
             const line = linePath(only.values.map((value, index) => ({ x: x(index), y: y(value ?? 0) })));

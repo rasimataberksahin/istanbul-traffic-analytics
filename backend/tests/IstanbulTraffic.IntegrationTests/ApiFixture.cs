@@ -67,6 +67,14 @@ public sealed class ApiFixture : IAsyncLifetime
 
         SELECT traffic.refresh_month_aggregates('2023-10-01');
         SELECT traffic.refresh_month_aggregates('2024-10-01');
+
+        -- Dry October 2024 except 2 mm of rain in each hour of the evening of Wednesday 2 October.
+        INSERT INTO traffic.weather_hourly (observed_at, temperature_c, precipitation_mm, snowfall_cm, weather_code)
+        SELECT
+            hour, 18,
+            CASE WHEN hour::date = DATE '2024-10-02' AND EXTRACT(HOUR FROM hour) BETWEEN 17 AND 19 THEN 2 ELSE 0 END,
+            0, 0
+        FROM generate_series(TIMESTAMP '2024-10-01 00:00', TIMESTAMP '2024-10-31 23:00', INTERVAL '1 hour') AS hour;
         """;
 
     private readonly PostgreSqlContainer _database = new PostgreSqlBuilder("postgres:18.6").Build();

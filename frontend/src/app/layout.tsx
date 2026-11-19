@@ -79,6 +79,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                   </a>
                 </li>
                 <li>
+                  {t("Hava verisi", "Weather data")}:{" "}
+                  <a href="https://open-meteo.com/" rel="noreferrer">
+                    Open-Meteo.com
+                  </a>{" "}
+                  (CC BY 4.0)
+                </li>
+                <li>
                   <a href="https://github.com/rasimataberksahin/istanbul-traffic-analytics" rel="noreferrer">
                     {t("Kaynak kodu GitHub'da", "Source code on GitHub")}
                   </a>

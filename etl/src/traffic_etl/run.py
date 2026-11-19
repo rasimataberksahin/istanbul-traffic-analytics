@@ -2,6 +2,9 @@
 
     python -m traffic_etl.run --from 2023-01 --to 2025-01
 
+After the months are loaded, the hourly weather of the same range is fetched from
+Open-Meteo (skip with --skip-weather).
+
 Every step is idempotent. A verified download is not fetched again, an existing
 Parquet file is not rebuilt and an unchanged file is not loaded twice, so a
 failed run can simply be started again.
@@ -10,14 +13,17 @@ failed run can simply be started again.
 from __future__ import annotations
 
 import argparse
+import calendar
 import logging
 import re
 import time
+from datetime import date
 
 from traffic_etl.config import PROCESSED_DIR, RAW_DIR
 from traffic_etl.extract import extract_month
 from traffic_etl.load import get_database_url, load_month
 from traffic_etl.transform import run_transform
+from traffic_etl.weather import load_weather
 
 logger = logging.getLogger("traffic_etl.run")
 
@@ -58,6 +64,7 @@ def main() -> None:
     parser.add_argument("--from", dest="first", required=True, help="First month, YYYY-MM")
     parser.add_argument("--to", dest="last", help="Last month, YYYY-MM. Defaults to --from.")
     parser.add_argument("--force", action="store_true", help="Rebuild and reload existing months")
+    parser.add_argument("--skip-weather", action="store_true", help="Do not fetch hourly weather from Open-Meteo")
     args = parser.parse_args()
 
     try:
@@ -73,6 +80,16 @@ def main() -> None:
         status = run_month(month, database_url, args.force)
         logger.info("%s %s in %.0f s.", month, status, time.perf_counter() - month_started)
     logger.info("%d months processed in %.0f s.", len(months), time.perf_counter() - started)
+
+    if not args.skip_weather:
+        first_day = date.fromisoformat(f"{months[0]}-01")
+        year, month = (int(part) for part in months[-1].split("-"))
+        last_day = date(year, month, calendar.monthrange(year, month)[1])
+        try:
+            load_weather(database_url, first_day, last_day)
+        except OSError as error:
+            # Weather enriches the analysis but is not needed to load traffic.
+            logger.warning("Weather could not be loaded (%s). Run python -m traffic_etl.weather later.", error)
 
 
 if __name__ == "__main__":

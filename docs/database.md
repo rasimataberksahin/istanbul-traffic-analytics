@@ -20,6 +20,13 @@ erDiagram
         text neighborhood
         text district
     }
+    weather_hourly {
+        timestamp observed_at PK
+        numeric temperature_c
+        numeric precipitation_mm
+        numeric snowfall_cm
+        smallint weather_code
+    }
     dim_date {
         date date_key PK
         smallint year

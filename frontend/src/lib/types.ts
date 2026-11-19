@@ -214,3 +214,29 @@ export interface LocationChangeReport {
   previousTo: string | null;
   locations: LocationChange[];
 }
+
+export type WeatherConditionKind = "dry" | "light_rain" | "heavy_rain" | "snow";
+
+export interface WeatherCondition {
+  condition: WeatherConditionKind;
+  hours: number;
+  eveningHours: number;
+  averageSpeedKmh: number | null;
+  speedChangeKmh: number | null;
+  eveningSpeedChangeKmh: number | null;
+  volumeChangePct: number | null;
+}
+
+export interface WeatherReport {
+  conditions: WeatherCondition[];
+  hourly: { hourOfDay: number; rainHours: number; speedChangeKmh: number | null }[];
+  districts: { district: string; cells: number; speedChangeKmh: number }[];
+  wettestEvenings: {
+    date: string;
+    dayName: string;
+    precipitationMm: number;
+    snowfallCm: number | null;
+    eveningSpeedKmh: number | null;
+    speedChangeKmh: number | null;
+  }[];
+}

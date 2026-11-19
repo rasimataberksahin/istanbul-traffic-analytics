@@ -43,6 +43,26 @@ public sealed class InsightEndpointTests(ApiFixture fixture)
     }
 
     [Fact]
+    public async Task Weather_report_compares_wet_hours_with_dry_hours_of_the_same_month_and_hour()
+    {
+        // Speeds in the seed do not depend on the weather, so the three wet hours change nothing.
+        var report = await _client.GetFromJsonAsync<JsonElement>("/api/v1/insights/weather");
+        var conditions = report.GetProperty("conditions");
+        var heavy = conditions.EnumerateArray().Single(item => item.GetProperty("condition").GetString() == "heavy_rain");
+        var evening = report.GetProperty("wettestEvenings")[0];
+
+        Assert.Equal(2, conditions.GetArrayLength());
+        Assert.Equal(3, heavy.GetProperty("hours").GetInt32());
+        Assert.Equal(3, heavy.GetProperty("eveningHours").GetInt32());
+        Assert.Equal(0m, heavy.GetProperty("speedChangeKmh").GetDecimal());
+        Assert.Equal(24, report.GetProperty("hourly").GetArrayLength());
+        Assert.Equal(0, report.GetProperty("districts").GetArrayLength());
+        Assert.Equal("2024-10-02", evening.GetProperty("date").GetString());
+        Assert.Equal(6m, evening.GetProperty("precipitationMm").GetDecimal());
+        Assert.Equal(0m, evening.GetProperty("speedChangeKmh").GetDecimal());
+    }
+
+    [Fact]
     public async Task Month_hour_matrix_has_every_weekday_hour()
     {
         var cells = await GetAsync("/api/v1/insights/month-hour");

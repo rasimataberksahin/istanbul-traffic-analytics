@@ -21,7 +21,7 @@ Uygulama `http://localhost:3000` adresinde açılır. API'nin `http://127.0.0.1:
 | Yol | Ekran | İçerik |
 |---|---|---|
 | `/` | Genel bakış | Seçilen dönemin göstergeleri ve bir önceki yılın aynı tarihleriyle farkı, saatlik hız, hız bantları, günlük trend, gün ve saat ısı haritası |
-| `/analiz` | Analiz raporu | Tüm ayları kapsayan 12 bölümlük uzun rapor |
+| `/analiz` | Analiz raporu | Tüm ayları kapsayan 13 bölümlük uzun rapor |
 | `/harita` | Tıkanıklık haritası | Gerçek harita altlığı üzerinde hücre bazında tıkanıklık, akşam hızı ve araç yoğunluğu; semt ve ilçe araması, 2B/3B görünüm, hızlı git düğmeleri, seçili semtin saatlik profili, ilçelere göre akşam tıkanıklığı, en yavaş 15 semt |
 | `/veri-hatti` | Veri hattı | Yüklenen aylar, aylık veri kapsamı, kalite işaretleri, yükleme geçmişi |
 | `/kilavuz` | Kullanım kılavuzu | Her ekranın ne gösterdiği, kontrollerin kullanımı ve grafiklerde geçen kavramların sözlüğü |
@@ -41,9 +41,10 @@ Her gösterge ve grafik kartının sağ üst köşesinde bir "i" düğmesi vard�
 | 7 | Takvim | Her günün akşam hızını gösteren takvim, en yavaş ve en hızlı 10 gün |
 | 8 | Okul, tatil ve Ramazan | Dönemlere göre saatlik hız ve hacim |
 | 9 | Bayramlar ve resmî tatiller | Tatil günlerinin olağan günlere göre farkı |
-| 10 | Öngörülebilirlik | Saatlik günlük hızın 10-90 ve 25-75 yüzdelik bantları |
-| 11 | Hangi bölgeler yavaşladı? | Son 12 ay ile önceki 12 ayın hücre bazında değişim haritası |
-| 12 | Veri kapsamı ve yöntem | Aylık kapsama ve analiz kuralları |
+| 10 | Hava durumu | Hafif yağmur, kuvvetli yağmur ve karın hıza etkisi; saatlik etki, yağmura en hassas ilçeler, en yağışlı akşamlar |
+| 11 | Öngörülebilirlik | Saatlik günlük hızın 10-90 ve 25-75 yüzdelik bantları |
+| 12 | Hangi bölgeler yavaşladı? | Son 12 ay ile önceki 12 ayın hücre bazında değişim haritası |
+| 13 | Veri kapsamı ve yöntem | Aylık kapsama ve analiz kuralları |
 
 Rapordaki bulgu kutuları sabit metin değildir. [`src/lib/insights.ts`](../frontend/src/lib/insights.ts) içindeki saf fonksiyonlar en yavaş ayı, yıllık farkı, Ramazan'daki zirve kaymasını ve benzeri sonuçları veriden hesaplar. Yeni bir ay yüklendiğinde metin de güncellenir. Bu fonksiyonlar Vitest ile test edilir.
 
@@ -75,6 +76,7 @@ Rapordaki bulgu kutuları sabit metin değildir. [`src/lib/insights.ts`](../fron
 | Basit ortalama yoğun saatleri hızlı gösteriyor | Ana metrik araç ağırlıklı ortalamadır |
 | Her saatte veri gönderen hücre sayısı değişiyor | Hacim, toplam araç yerine hücre ve saat başına ortalama araçla karşılaştırılır |
 | Mevsim etkisi yıllık farkı gizleyebilir | Yıllık karşılaştırma aynı ayın iki yılı arasında yapılır |
+| Hava etkisi aynı ay ve saatle karşılaştırılır | Yağışlı saatler, aynı ayın aynı saatindeki kuru hafta içi saatlerle kıyaslanır. Mevsim, günün saati ve sayım düzeyi böylece sonucu etkilemez |
 | Sayım değişikliği araç ağırlıklarını kaydırır | Yıllık akşam farkı ayrıca sabit ağırlıkla (her hücrenin ilk yüklenen yıldaki akşam araç payı) ve medyan hücreyle hesaplanır |
 | Bölgesel değişim hücre karışımından etkilenebilir | Her hücre kendi geçmişiyle kıyaslanır |
 | Takvim renkleri tek bir aya göre ayarlanırsa yanıltır | Takvim renk sınıfları tüm iş günlerinin dağılımından hesaplanır |

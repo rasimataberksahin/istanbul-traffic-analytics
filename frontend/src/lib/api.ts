@@ -20,6 +20,7 @@ import type {
   SlowestLocation,
   SpeedBand,
   TrafficSummary,
+  WeatherReport,
 } from "@/lib/types";
 
 const baseUrl = process.env.API_BASE_URL ?? "http://127.0.0.1:5088";
@@ -133,3 +134,5 @@ export const getHolidayEffects = () => get<HolidayEffect[]>("/api/v1/insights/ho
 export const getReliability = () => get<ReliabilityPoint[]>("/api/v1/insights/reliability");
 
 export const getLocationChanges = () => get<LocationChangeReport>("/api/v1/insights/location-changes");
+
+export const getWeather = () => get<WeatherReport>("/api/v1/insights/weather");

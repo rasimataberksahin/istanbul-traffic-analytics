@@ -10,7 +10,7 @@
 |---|---|
 | **Veri** | Ocak 2023 - Ocak 2025, 25 ay, 40,1 milyon saatlik ölçüm, 2.464 konum hücresi |
 | **Hat** | Python ETL → PostgreSQL yıldız şema ve özet katman → ASP.NET Core API → Next.js dashboard |
-| **Kalite** | 256 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
+| **Kalite** | 261 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
 
 ## Öne çıkan bulgular
 
@@ -22,13 +22,14 @@
 | Yaz tatilinde sabah zirvesi okul dönemine göre daha rahat | +4,9 km/sa |
 | Ramazan'da akşam hacmi 18:00 yerine 17:00'de zirve yapar, iftar saatinde düşer | Zirveye göre −%10,8 |
 | 2024 Ramazan Bayramı'nda gündüz trafik hacmi olağan günlerin yarısına indi | −%54,5 |
+| Kuvvetli yağmur (saatte 1 mm üstü) şehri yavaşlatıyor ama araç sayısını değiştirmiyor; en hassas ilçeler doğudaki otoyol aksında | −2,0 km/sa, araç −%0,1 |
 | Haftanın en yavaş saati | Çarşamba 18:00, 43,9 km/sa |
 | En öngörülemez saat: iyi ve kötü günler arasındaki fark en büyük | 08:00, 43,7-51,3 km/sa |
 | 24 Ocak 2024'te hücre başına araç bir günde 1,7 katına çıktı, hızda karşılığı yok: İBB'nin sayım düzeyi değişti | 73 → 123 araç |
 
 İlk iki satır projenin en önemli bulgusudur. Şehir ortalaması araç sayısıyla ağırlıklandırılır ve Ocak 2024'teki sayım değişikliği bu ağırlıkları kaydırdı. Hücrelerin hızı yerinde sayarken ortalamanın yükselmesi, sayım artışının en çok hızlı yollarda olduğunu ve bu yolların ortalamadaki payının büyüdüğünü düşündürür. Bu yüzden rapor yıllık karşılaştırmayı üç ölçüyle gösterir: araç ağırlıklı, ilk yılın araç paylarıyla sabit ağırlıklı ve medyan hücre. Sonuç: veriye göre 2024'te İstanbul'un akşam trafiği rahatlamadı. Dashboard sayım kırılmasını veriden tespit eder ve kırılmanın iki yanı arasında hacim karşılaştırmaz. Ayrıntılı hesap [uzun dönem notebook'undadır](notebooks/02_long_term_trends.ipynb).
 
-Bulguların tamamı dashboard'daki 12 bölümlük [analiz raporundadır](docs/dashboard.md#analiz-raporu-bölümleri). Rapor metni veriden hesaplanır, yeni bir ay yüklendiğinde kendiliğinden güncellenir.
+Bulguların tamamı dashboard'daki 13 bölümlük [analiz raporundadır](docs/dashboard.md#analiz-raporu-bölümleri). Rapor metni veriden hesaplanır, yeni bir ay yüklendiğinde kendiliğinden güncellenir.
 
 ## Ekranlar
 
@@ -155,7 +156,7 @@ Ayrıntılar: [Veritabanı tasarımı](docs/database.md) · [Ekim 2024 SQL anali
 
 ## REST API
 
-.NET 10 ile yazılan katmanlı API 21 endpoint sunar: anlık filtreli analizler, 25 ayı kapsayan uzun dönem analizleri, konum analizleri ve veri hattı yönetimi.
+.NET 10 ile yazılan katmanlı API 22 endpoint sunar: anlık filtreli analizler, 25 ayı kapsayan uzun dönem analizleri, konum analizleri ve veri hattı yönetimi.
 
 - **Dapper / Npgsql:** Özet katman ve ham tablo üzerinde elle yazılmış analitik SQL
 - **EF Core:** `admin` şemasındaki yönetim tabloları ve migration'lar
@@ -169,7 +170,7 @@ Ayrıntılar: [API dokümanı](docs/api.md)
 | Ekran | İçerik |
 |---|---|
 | Genel bakış | Seçilen dönemin göstergeleri, önceki yılın aynı tarihleriyle fark, saatlik ve günlük hız |
-| Analiz raporu | 12 bölüm: aylık trend, yıllık karşılaştırma, mevsimsellik, takvim, okul ve Ramazan dönemleri, tatiller, öngörülebilirlik, bölgesel değişim |
+| Analiz raporu | 13 bölüm: aylık trend, yıllık karşılaştırma, mevsimsellik, takvim, okul ve Ramazan dönemleri, tatiller, hava durumu, öngörülebilirlik, bölgesel değişim |
 | Harita | 2.000'i aşkın hücrenin akşam tıkanıklığı, semt ve ilçe araması, ilçe sıralaması, semt profili |
 | Veri hattı | Aylık kapsama, kalite işaretleri, yükleme geçmişi |
 | Kılavuz | Ekranların, kontrollerin ve kavramların açıklaması |
@@ -182,8 +183,8 @@ Ayrıntılar: [Dashboard dokümanı](docs/dashboard.md)
 
 | Bileşen | Araç | Test |
 |---|---|---:|
-| ETL | pytest, geçici PostgreSQL veritabanları | 94 |
-| Backend | xUnit v3, Testcontainers | 85 |
+| ETL | pytest, geçici PostgreSQL veritabanları | 98 |
+| Backend | xUnit v3, Testcontainers | 86 |
 | Frontend | Vitest | 77 |
 
 GitHub Actions her push ve pull request'te üç test grubunu, lint ve tip kontrolünü, üretim derlemesini ve üç Docker imajının derlenmesini çalıştırır.
