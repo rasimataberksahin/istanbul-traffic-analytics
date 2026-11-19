@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BandChart } from "@/components/charts/BandChart";
 import { CalendarHeatmap } from "@/components/charts/CalendarHeatmap";
-import { CellMap } from "@/components/charts/CellMap";
+import { TrafficMap, type MapMode } from "@/components/charts/TrafficMap";
 import { MatrixHeatmap } from "@/components/charts/MatrixHeatmap";
 import { SeriesChart } from "@/components/charts/SeriesChart";
 import {
@@ -57,6 +57,16 @@ import {
 } from "@/lib/insights";
 import { changeClass } from "@/lib/scale";
 import type { MonthlyInsight } from "@/lib/types";
+
+const CHANGE_MAP_MODES: MapMode[] = [
+  {
+    id: "change",
+    label: "Akşam zirvesi hız değişimi",
+    palette: "div",
+    legend: { low: "6 km/sa üstü hızlandı", high: "6 km/sa üstü yavaşladı" },
+    extrude: "magnitude",
+  },
+];
 
 export const metadata: Metadata = { title: "Analiz raporu" };
 export const dynamic = "force-dynamic";
@@ -779,20 +789,22 @@ export default async function AnalysisPage() {
             ) : (
               <div className="grid">
                 <ChartCard className="span-8" subtitle={`${formatInteger(located.length)} hücre. Kırmızı hücreler yavaşladı, mavi hücreler hızlandı.`} title="Akşam zirvesi hız değişimi">
-                  <CellMap
+                  <TrafficMap
                     ariaLabel="Hücrelere göre akşam zirvesi hız değişimi haritası. En çok değişen hücreler yandaki tablolardadır."
+                    compact
+                    cooperative
                     cells={located.map((cell) => ({
                       id: cell.geohash,
                       latitude: cell.latitude,
                       longitude: cell.longitude,
-                      level: changeClass(cell.speedChangeKmh),
+                      levels: [changeClass(cell.speedChangeKmh)],
                       lines: [
                         { value: `${formatSigned(cell.speedChangeKmh)} km/sa`, label: "değişim" },
                         { value: formatSpeed(cell.currentPeakSpeedKmh), label: "son 12 ay" },
                         { value: formatSpeed(cell.previousPeakSpeedKmh), label: "önceki 12 ay" },
                       ],
                     }))}
-                    legend={{ low: "6 km/sa üstü hızlandı", high: "6 km/sa üstü yavaşladı" }}
+                    modes={CHANGE_MAP_MODES}
                   />
                 </ChartCard>
                 <div className="span-4 stack">

@@ -1,13 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CellMap } from "@/components/charts/CellMap";
 import { LocationHourlyChart } from "@/components/charts/LocationHourlyChart";
 import { FilterFrame } from "@/components/FilterFrame";
-import { ChartCard, EmptyState } from "@/components/ui";
+import { TrafficMap, type MapMode } from "@/components/charts/TrafficMap";
+import { EmptyState } from "@/components/ui";
 import { getCongestionMap, getLocationProfile, getMetadata, getSlowestLocations } from "@/lib/api";
 import { buildRange, parseFilter, parseGeohash, toSearchParams, type RawSearchParams } from "@/lib/filters";
 import { formatDecimal, formatIndex, formatInteger, formatLongDate, formatSpeed } from "@/lib/format";
-import { congestionClass } from "@/lib/scale";
+import { quantileThresholds } from "@/lib/map";
+import { classOf, congestionClass, heatClass } from "@/lib/scale";
+
+const MODES: MapMode[] = [
+  {
+    id: "congestion",
+    label: "Tıkanıklık",
+    palette: "div",
+    legend: { low: "Akşam daha hızlı", high: "Akşam hızı yarıdan fazla düşük" },
+    extrude: "ascending",
+  },
+  {
+    id: "speed",
+    label: "Akşam hızı",
+    palette: "heat",
+    legend: { low: "45 km/sa altı", high: "70 km/sa üstü" },
+    extrude: "descending",
+  },
+  {
+    id: "volume",
+    label: "Araç yoğunluğu",
+    palette: "heat",
+    legend: { low: "En çok araç", high: "En az araç" },
+    extrude: "descending",
+  },
+];
 
 export const metadata: Metadata = { title: "Tıkanıklık haritası" };
 export const dynamic = "force-dynamic";
@@ -26,6 +51,7 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
   const selected = parseGeohash(params) ?? slowest[0]?.geohash ?? points[0]?.geohash ?? null;
   const profile = selected ? await getLocationProfile(selected, filter) : null;
   const selectedPoint = points.find((point) => point.geohash === selected);
+  const volumeThresholds = quantileThresholds(points.map((point) => point.averagePeakVehicleCount));
 
   return (
     <>
@@ -46,66 +72,66 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
             message="Bir hücrenin gösterilmesi için gece ve akşam saatlerinde en az 30'ar gözlem gerekir. Daha geniş bir tarih aralığı seçin."
           />
         ) : (
-          <div className="map-layout">
-            <ChartCard
-              title="Tıkanıklık endeksi"
-              subtitle={`${formatInteger(points.length)} hücre, ${formatLongDate(filter.from)} ile ${formatLongDate(filter.to)} arası`}
-            >
-              <CellMap
-                ariaLabel="İstanbul tıkanıklık haritası. Hücre seçmek için aşağıdaki en yavaş hücreler tablosunu da kullanabilirsiniz."
-                cells={points.map((point) => ({
-                  id: point.geohash,
-                  latitude: point.latitude,
-                  longitude: point.longitude,
-                  level: congestionClass(point.congestionIndex),
-                  lines: [
-                    { value: formatIndex(point.congestionIndex), label: "tıkanıklık endeksi" },
-                    { value: formatSpeed(point.peakSpeedKmh), label: "akşam" },
-                    { value: formatSpeed(point.freeFlowSpeedKmh), label: "gece" },
-                  ],
-                }))}
-                legend={{ low: "Akşam daha hızlı", high: "Akşam hızı yarıdan fazla düşük" }}
-                selectParam="cell"
-                selected={selected}
-              />
-            </ChartCard>
+          <div className="stack">
+            <TrafficMap
+              ariaLabel="İstanbul akşam tıkanıklığı haritası. Fare ya da klavye ile kaydırıp yakınlaştırabilirsiniz. Hücre seçmek için aşağıdaki en yavaş hücreler tablosunu da kullanabilirsiniz."
+              cells={points.map((point) => ({
+                id: point.geohash,
+                latitude: point.latitude,
+                longitude: point.longitude,
+                levels: [
+                  congestionClass(point.congestionIndex),
+                  heatClass(point.peakSpeedKmh),
+                  8 - classOf(point.averagePeakVehicleCount, volumeThresholds),
+                ],
+                lines: [
+                  { value: formatIndex(point.congestionIndex), label: "tıkanıklık endeksi" },
+                  { value: formatSpeed(point.peakSpeedKmh), label: "akşam zirvesi" },
+                  { value: formatSpeed(point.freeFlowSpeedKmh), label: "gece" },
+                  { value: formatDecimal(point.averagePeakVehicleCount), label: "araç / saat, akşam" },
+                ],
+              }))}
+              modes={MODES}
+              note={`${formatInteger(points.length)} hücre · ${formatLongDate(filter.from)} - ${formatLongDate(filter.to)}`}
+              panel={
+                profile ? (
+                  <>
+                    <p className="eyebrow">Seçili hücre</p>
+                    <h2 className="mono">{profile.location.geohash}</h2>
+                    <p className="card-subtitle">Hafta içi saatlik hız profili. Haritadan başka bir hücreye tıklayabilirsiniz.</p>
+                    <dl className="details">
+                      <div>
+                        <dt>Tıkanıklık endeksi</dt>
+                        <dd>{selectedPoint ? formatIndex(selectedPoint.congestionIndex) : "Veri yok"}</dd>
+                      </div>
+                      <div>
+                        <dt>Akşam zirvesi</dt>
+                        <dd>{formatSpeed(selectedPoint?.peakSpeedKmh)}</dd>
+                      </div>
+                      <div>
+                        <dt>Gece</dt>
+                        <dd>{formatSpeed(selectedPoint?.freeFlowSpeedKmh)}</dd>
+                      </div>
+                      <div>
+                        <dt>Araç-hız korelasyonu</dt>
+                        <dd>
+                          {profile.location.vehicleSpeedCorrelation === null
+                            ? "Veri yok"
+                            : formatIndex(profile.location.vehicleSpeedCorrelation)}
+                        </dd>
+                      </div>
+                    </dl>
+                    <LocationHourlyChart points={profile.hourlyProfile} />
+                  </>
+                ) : (
+                  <p className="card-subtitle">Bu hücre için veri bulunamadı.</p>
+                )
+              }
+              selectParam="cell"
+              selected={selected}
+            />
 
-            <ChartCard
-              title={profile ? `Hücre ${profile.location.geohash}` : "Seçili hücre"}
-              subtitle="Hafta içi saatlik profil. Haritadan başka bir hücre seçebilirsiniz."
-            >
-              {profile ? (
-                <>
-                  <dl className="details">
-                    <div>
-                      <dt>Tıkanıklık endeksi</dt>
-                      <dd>{selectedPoint ? formatIndex(selectedPoint.congestionIndex) : "Veri yok"}</dd>
-                    </div>
-                    <div>
-                      <dt>Akşam zirvesi hızı</dt>
-                      <dd>{formatSpeed(selectedPoint?.peakSpeedKmh)}</dd>
-                    </div>
-                    <div>
-                      <dt>Gece hızı</dt>
-                      <dd>{formatSpeed(selectedPoint?.freeFlowSpeedKmh)}</dd>
-                    </div>
-                    <div>
-                      <dt>Araç-hız korelasyonu</dt>
-                      <dd>
-                        {profile.location.vehicleSpeedCorrelation === null
-                          ? "Veri yok"
-                          : formatIndex(profile.location.vehicleSpeedCorrelation)}
-                      </dd>
-                    </div>
-                  </dl>
-                  <LocationHourlyChart points={profile.hourlyProfile} />
-                </>
-              ) : (
-                <p className="card-subtitle">Bu hücre için veri bulunamadı.</p>
-              )}
-            </ChartCard>
-
-            <section className="card" style={{ gridColumn: "1 / -1" }}>
+            <section className="card">
               <h2>Akşam zirvesinin en yavaş 15 hücresi</h2>
               <p className="card-subtitle">Hafta içi 17:00-19:59, en az 30 saat güvenilir gözlem</p>
               <div className="card-body">

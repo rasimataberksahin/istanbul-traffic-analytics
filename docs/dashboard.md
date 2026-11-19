@@ -22,7 +22,7 @@ Uygulama `http://localhost:3000` adresinde açılır. API'nin `http://127.0.0.1:
 |---|---|---|
 | `/` | Genel bakış | Seçilen dönemin göstergeleri ve bir önceki yılın aynı tarihleriyle farkı, saatlik hız, hız bantları, günlük trend, gün ve saat ısı haritası |
 | `/analiz` | Analiz raporu | Tüm ayları kapsayan 12 bölümlük uzun rapor |
-| `/harita` | Tıkanıklık haritası | Hücre bazında akşam tıkanıklığı, seçili hücrenin saatlik profili, en yavaş 15 hücre |
+| `/harita` | Tıkanıklık haritası | Gerçek harita altlığı üzerinde hücre bazında tıkanıklık, akşam hızı ve araç yoğunluğu; 2B/3B görünüm, hızlı git düğmeleri, seçili hücrenin saatlik profili, en yavaş 15 hücre |
 | `/veri-hatti` | Veri hattı | Yüklenen aylar, aylık veri kapsamı, kalite işaretleri, yükleme geçmişi |
 
 ### Analiz raporu bölümleri
@@ -53,8 +53,10 @@ Rapordaki bulgu kutuları sabit metin değildir. [`src/lib/insights.ts`](../fron
 | URL değerleri sunucuda doğrulanır | Geçersiz tarih API'ye ulaşmaz, aralık yüklü veriye ve en fazla 366 güne sınırlanır |
 | Varsayılan dönem son yüklenen aydır | Her açılışta en güncel tablo görünür, uzun dönemler analiz raporundadır |
 | Grafikler SVG ile yazıldı | Harici grafik kütüphanesi gerekmez, istemci paketi küçük kalır |
-| Harita altlık kullanmaz | Üçüncü taraf harita servisine bağımlılık yoktur, yol ağı verinin kendisinden görünür |
-| Renk sınıfları sunucuda hesaplanır | Haritaya yalnızca seviye ve ipucu metni gider, aynı bileşen iki farklı haritayı çizer |
+| Harita MapLibre GL ile çizilir | Açık kaynaklı, API anahtarı istemeyen OpenFreeMap vektör karoları kullanılır. Kütüphane yalnızca harita açıldığında yüklenir |
+| Altlık erişilemezse hücreler yine çizilir | Karo servisi yanıt vermezse harita düz bir zemine geçer ve bunu lejantta belirtir |
+| Renk sınıfları sunucuda hesaplanır | Haritaya her ölçü için yalnızca seviye ve ipucu metni gider, aynı bileşen iki farklı haritayı çizer. Renkler grafiklerle aynı tema değişkenlerinden okunur, koyu temada altlık da koyulaşır |
+| 3B yükseklik yakınlaştıkça kısalır | Şehir ölçeğinde fark belirgin olur, sokak ölçeğinde sütunlar yolu kapatmaz |
 
 ## Veri gösterimi kuralları
 
@@ -72,6 +74,6 @@ Rapordaki bulgu kutuları sabit metin değildir. [`src/lib/insights.ts`](../fron
 - Grafiklerin tamamı tablo görünümüyle de okunabilir.
 - Çizgi ve bant grafikleri klavyedeki sol ve sağ ok tuşlarıyla gezilebilir.
 - Önceki yıla göre değişim, renge ek olarak ok yönü ve "iyileşme" veya "kötüleşme" kelimesiyle gösterilir.
-- Haritadaki en yavaş 15 hücre klavyeyle tablodan seçilebilir. Diğer hücreler için fare veya dokunma gerekir.
+- Harita klavyeyle kaydırılıp yakınlaştırılabilir. En yavaş 15 hücre tablodan seçilebilir, seçilen hücreye harita kendisi gider. Diğer hücreleri seçmek için fare veya dokunma gerekir.
 - Açık ve koyu tema, işletim sistemi tercihini izler.
 - Çizgi grafiklerin ilk dört rengi, komşu seriler için renk körlüğü kontrolünden geçmiş paletten alınır.
