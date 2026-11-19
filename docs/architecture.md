@@ -106,7 +106,7 @@ Bir aşamanın çıktıları tamamlanmadan sonrakine geçilmez.
 | 1 | Veriyi bulma ve inceleme | İndirme kodu, profil, veri sözlüğü, kalite raporu | Tamamlandı |
 | 2 | Python ETL | Temizleme, doğrulama, Parquet çıktısı, pytest | Tamamlandı |
 | 3 | PostgreSQL ve SQL | Docker, şema, yükleme, indeksler, en az 10 analitik sorgu | Tamamlandı |
-| 4 | EDA | Jupyter Notebook ve yorumlu analiz raporu | Tamamlandı |
+| 4 | EDA | Jupyter Notebook'lar (tek ay ve 25 ay) ve yorumlu analiz raporu | Tamamlandı |
 | 5 | ASP.NET Core API | Katmanlı API, EF Core, Dapper, middleware, xUnit | Tamamlandı |
 | 6 | Next.js dashboard | Filtreler, grafikler, harita, karşılaştırma ekranları | Tamamlandı |
 | 7 | Yayın | Çok aylık veri, analiz raporu, Docker Compose, GitHub Actions, final README | Tamamlandı |

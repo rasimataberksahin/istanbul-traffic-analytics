@@ -185,9 +185,22 @@ Ayrıntılar: [Dashboard dokümanı](docs/dashboard.md)
 
 GitHub Actions her push ve pull request'te üç test grubunu, lint ve tip kontrolünü, üretim derlemesini ve üç Docker imajının derlenmesini çalıştırır.
 
-## Keşifsel veri analizi
+## Notebook'lar
 
-Ekim 2024 üzerinde yapılan ilk keşif [notebook](notebooks/01_exploratory_analysis.ipynb) ve [EDA raporu](docs/eda-report-2024-10.md) olarak duruyor. Toplu korelasyonun hücre içi ilişkiyi gizlediği Simpson paradoksu bulgusu, dashboard'daki hücre bazlı korelasyonun nedenidir.
+İki Jupyter notebook, kodu ve çıktılarıyla birlikte GitHub'da doğrudan okunabilir:
+
+| Notebook | Kapsam | Öne çıkan bulgu |
+|---|---|---|
+| [01 Keşifsel analiz](notebooks/01_exploratory_analysis.ipynb) | Ekim 2024, tek ay | Toplu korelasyon hücre içi ilişkiyi gizliyor (Simpson paradoksu), dashboard'daki korelasyon bu yüzden hücre bazında |
+| [02 Uzun dönem analizi](notebooks/02_long_term_trends.ipynb) | Ocak 2023 - Ocak 2025, 25 ay | Araç sayımı 24 Ocak 2024'te 1,68 katına çıktı. Ağırlıklar sabitlendiğinde 2024'teki +1,65 km/sa'lik akşam hızlanması -0,32 km/sa'e döner |
+
+İkinci notebook 40 milyon satırı ham parquet dosyalarından pandas ile işler ve sonuçlarını SQL analizlerinin çıktılarıyla karşılaştırır. 11 kontrolün hepsi yuvarlama payı içinde eşleşir. Ekim 2024 bulguları ayrıca [EDA raporunda](docs/eda-report-2024-10.md) özetlenmiştir.
+
+Notebook'ları yeniden çalıştırmak için önce ETL ile ilgili ayların parquet dosyaları üretilmelidir:
+
+```bash
+.venv/Scripts/python -m jupyter nbconvert --to notebook --execute --inplace notebooks/02_long_term_trends.ipynb
+```
 
 ## Bilinen sınırlamalar
 
