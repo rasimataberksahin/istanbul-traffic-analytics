@@ -1,5 +1,6 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+
+export { ChartCard, EmptyState, Finding, InfoTip, StatTile } from "@/components/ui-client";
 
 export interface StatDelta {
   text: string;
@@ -9,59 +10,12 @@ export interface StatDelta {
   tone: "better" | "worse" | "neutral";
 }
 
-const TONE_WORDS = { better: "iyileşme", worse: "kötüleşme", neutral: "" } as const;
-const ARROWS = { up: "▲", down: "▼", flat: "●" } as const;
-
 /** Builds a delta for a change whose good direction is known. */
 export function makeDelta(change: number, text: string, higherIsBetter: boolean | null, epsilon = 0.05): StatDelta {
   const direction = Math.abs(change) < epsilon ? "flat" : change > 0 ? "up" : "down";
   const tone =
     direction === "flat" || higherIsBetter === null ? "neutral" : (direction === "up") === higherIsBetter ? "better" : "worse";
   return { text, direction, tone };
-}
-
-export function StatTile({ label, value, note, delta }: { label: string; value: string; note?: string; delta?: StatDelta }) {
-  return (
-    <div className="stat">
-      <div className="stat-label">{label}</div>
-      <div className="stat-value">{value}</div>
-      {note ? <div className="stat-note">{note}</div> : null}
-      {delta ? (
-        <div className="stat-delta" data-tone={delta.tone}>
-          <span aria-hidden="true" className="delta-mark">
-            {ARROWS[delta.direction]}
-          </span>
-          <span>{delta.text}</span>
-          {delta.tone !== "neutral" ? <span className="delta-word">{TONE_WORDS[delta.tone]}</span> : null}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-interface ChartCardProps {
-  title: string;
-  subtitle?: string;
-  className?: string;
-  table?: ReactNode;
-  children: ReactNode;
-}
-
-/** A titled chart with an optional table view of the same values. */
-export function ChartCard({ title, subtitle, className = "", table, children }: ChartCardProps) {
-  return (
-    <section className={`card ${className}`}>
-      <h2>{title}</h2>
-      {subtitle ? <p className="card-subtitle">{subtitle}</p> : null}
-      <div className="card-body">{children}</div>
-      {table ? (
-        <details className="table-toggle">
-          <summary>Tabloyu göster</summary>
-          {table}
-        </details>
-      ) : null}
-    </section>
-  );
 }
 
 export function DataTable({ columns, rows }: { columns: string[]; rows: string[][] }) {
@@ -79,7 +33,7 @@ export function DataTable({ columns, rows }: { columns: string[]; rows: string[]
         </thead>
         <tbody>
           {rows.map((row, rowIndex) => (
-            <tr key={row[0] ?? rowIndex}>
+            <tr key={`${row[0] ?? ""}-${rowIndex}`}>
               {row.map((cell, cellIndex) => (
                 <td key={columns[cellIndex]}>{cell}</td>
               ))}
@@ -109,20 +63,6 @@ export function HorizontalBars({ items }: { items: { label: string; value: numbe
   );
 }
 
-export function EmptyState({ title, message, resetHref }: { title: string; message: string; resetHref?: string }) {
-  return (
-    <section className="empty">
-      <h2>{title}</h2>
-      <p>{message}</p>
-      {resetHref ? (
-        <Link className="button" href={resetHref}>
-          Filtreleri sıfırla
-        </Link>
-      ) : null}
-    </section>
-  );
-}
-
 interface ReportSectionProps {
   id: string;
   number: number;
@@ -144,17 +84,6 @@ export function ReportSection({ id, number, title, lead, children }: ReportSecti
       </header>
       <div className="report-section-body">{children}</div>
     </section>
-  );
-}
-
-/** A finding derived from the data shown next to it. */
-export function Finding({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <aside className="finding">
-      <div className="finding-label">Bulgu</div>
-      <p className="finding-title">{title}</p>
-      <div className="finding-text">{children}</div>
-    </aside>
   );
 }
 

@@ -3,7 +3,7 @@
 import { useMemo, useState, type PointerEvent } from "react";
 import { useChartWidth } from "@/components/charts/useChartWidth";
 import { DataTable } from "@/components/ui";
-import { formatDecimal, formatHour, formatSpeed } from "@/lib/format";
+import { useI18n } from "@/lib/i18n/client";
 import { classOf, HEAT_THRESHOLDS } from "@/lib/scale";
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
@@ -41,6 +41,8 @@ export function MatrixHeatmap({
 }: MatrixHeatmapProps) {
   const { ref, width } = useChartWidth(1240);
   const [active, setActive] = useState<{ rowIndex: number; hour: number } | null>(null);
+  const { t, f } = useI18n();
+  const { formatDecimal, formatHour, formatSpeed, noData, speedUnit } = f;
   const margin = { top: 4, right: 0, bottom: 24, left: labelWidth };
 
   const values = useMemo(() => new Map(cells.map((cell) => [`${cell.row}|${cell.hour}`, cell.value])), [cells]);
@@ -66,7 +68,7 @@ export function MatrixHeatmap({
     <div>
       <div className="chart" ref={ref}>
         <svg
-          aria-label={`${ariaLabel}. Tüm değerler aşağıdaki tabloda yer alır.`}
+          aria-label={`${ariaLabel}. ${t("Tüm değerler aşağıdaki tabloda yer alır.", "All values are in the table below.")}`}
           height={height}
           role="img"
           viewBox={`0 0 ${width} ${height}`}
@@ -127,24 +129,24 @@ export function MatrixHeatmap({
               {activeRow.title}, {formatHour(active.hour)}
             </div>
             <div className="tooltip-row">
-              <strong>{activeValue === undefined || activeValue === null ? "Veri yok" : formatSpeed(activeValue)}</strong>
+              <strong>{activeValue === undefined || activeValue === null ? noData : formatSpeed(activeValue)}</strong>
             </div>
           </div>
         ) : null}
       </div>
 
       <div className="scale-legend" aria-hidden="true">
-        <span>{thresholds[0]} km/sa altı</span>
+        <span>{t(`${thresholds[0]} km/sa altı`, `below ${thresholds[0]} ${speedUnit}`)}</span>
         <span className="scale-swatches">
           {[1, 2, 3, 4, 5, 6, 7].map((level) => (
             <span key={level} style={{ background: `var(--heat-${level})` }} />
           ))}
         </span>
-        <span>{thresholds.at(-1)} km/sa üstü</span>
+        <span>{t(`${thresholds.at(-1)} km/sa üstü`, `above ${thresholds.at(-1)} ${speedUnit}`)}</span>
       </div>
 
       <details className="table-toggle">
-        <summary>Tabloyu göster</summary>
+        <summary>{t("Tabloyu göster", "Show table")}</summary>
         <DataTable
           columns={["", ...HOURS.map(formatHour)]}
           rows={rows.map((row) => [

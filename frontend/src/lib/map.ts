@@ -20,6 +20,12 @@ export interface MapMode {
 
 export interface MapCell {
   id: string;
+  /** Neighbourhood name shown in the tooltip and search; falls back to the id. */
+  title?: string;
+  /** District name under the title. */
+  subtitle?: string;
+  /** True when the title is already the district, so the search lists no separate district entry. */
+  isDistrictOnly?: boolean;
   latitude: number;
   longitude: number;
   /** One color level from 1 to 7 per mode, in the same order as the modes. */
@@ -30,6 +36,7 @@ export interface MapCell {
 
 export interface Place {
   label: string;
+  labelEn: string;
   longitude: number;
   latitude: number;
   zoom: number;
@@ -37,11 +44,11 @@ export interface Place {
 
 /** Quick views over the places people usually ask about. */
 export const PLACES: Place[] = [
-  { label: "Tarihi Yarımada", longitude: 28.968, latitude: 41.011, zoom: 13.4 },
-  { label: "15 Temmuz Köprüsü", longitude: 29.034, latitude: 41.046, zoom: 13.6 },
-  { label: "FSM Köprüsü", longitude: 29.061, latitude: 41.091, zoom: 13.6 },
-  { label: "Avrupa yakası", longitude: 28.86, latitude: 41.06, zoom: 11.2 },
-  { label: "Anadolu yakası", longitude: 29.15, latitude: 40.99, zoom: 11.2 },
+  { label: "Tarihi Yarımada", labelEn: "Historic Peninsula", longitude: 28.968, latitude: 41.011, zoom: 13.4 },
+  { label: "15 Temmuz Köprüsü", labelEn: "15 July Bridge", longitude: 29.034, latitude: 41.046, zoom: 13.6 },
+  { label: "FSM Köprüsü", labelEn: "FSM Bridge", longitude: 29.061, latitude: 41.091, zoom: 13.6 },
+  { label: "Avrupa yakası", labelEn: "European side", longitude: 28.86, latitude: 41.06, zoom: 11.2 },
+  { label: "Anadolu yakası", labelEn: "Asian side", longitude: 29.15, latitude: 40.99, zoom: 11.2 },
 ];
 
 const BASE_HEIGHT_METERS = 40;

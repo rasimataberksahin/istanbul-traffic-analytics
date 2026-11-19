@@ -7,6 +7,17 @@ export const PERIOD_LABELS: Record<PeriodKind, string> = {
   ramadan: "Ramazan",
 };
 
+export const PERIOD_LABELS_EN: Record<PeriodKind, string> = {
+  school_term: "School term",
+  school_break: "Semester and mid-term breaks",
+  summer_break: "Summer break",
+  ramadan: "Ramadan",
+};
+
+/** Period name in the reader's language. */
+export const periodLabel = (period: PeriodKind, locale: "tr" | "en") =>
+  locale === "en" ? PERIOD_LABELS_EN[period] : PERIOD_LABELS[period];
+
 export const PERIOD_ORDER: PeriodKind[] = ["school_term", "school_break", "summer_break", "ramadan"];
 
 /** A weekday needs most of its hours to be compared with other days. */

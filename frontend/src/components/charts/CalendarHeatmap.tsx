@@ -2,11 +2,13 @@
 
 import { useMemo, useState, type PointerEvent } from "react";
 import { useChartWidth } from "@/components/charts/useChartWidth";
-import { formatLongDate, formatMonthIndex, formatSpeed } from "@/lib/format";
+import { useI18n } from "@/lib/i18n/client";
+import { dayName, term } from "@/lib/i18n/terms";
 import { classOf } from "@/lib/scale";
 import type { CalendarDay } from "@/lib/types";
 
 const WEEKDAY_LABELS = ["Pzt", "", "Çar", "", "Cum", "", "Paz"];
+const WEEKDAY_LABELS_EN = ["Mon", "", "Wed", "", "Fri", "", "Sun"];
 const LABEL_WIDTH = 34;
 const MONTH_ROW = 18;
 const YEAR_GAP = 26;
@@ -36,6 +38,8 @@ export function CalendarHeatmap({ days, thresholds }: { days: CalendarDay[]; thr
   const { ref, width } = useChartWidth(1100);
   const [active, setActive] = useState<Placed | null>(null);
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
+  const { locale, t, f } = useI18n();
+  const { formatLongDate, formatMonthIndex, formatSpeed } = f;
 
   const years = useMemo(() => {
     const grouped = new Map<number, CalendarDay[]>();
@@ -70,7 +74,7 @@ export function CalendarHeatmap({ days, thresholds }: { days: CalendarDay[]; thr
     <div>
       <div className="chart calendar" ref={ref}>
         <svg
-          aria-label="Takvim ısı haritası: her kare bir gündür, renk akşam 17:00-19:59 şehir hızını gösterir. Günlük değerler sayfadaki tablolarda yer alır."
+          aria-label={t("Takvim ısı haritası: her kare bir gündür, renk akşam 17:00-19:59 şehir hızını gösterir. Günlük değerler sayfadaki tablolarda yer alır.", "Calendar heatmap: each square is a day, colored by the 17:00-19:59 city speed. Daily values are in the tables on this page.")}
           height={height}
           role="img"
           viewBox={`0 0 ${width} ${height}`}
@@ -95,7 +99,7 @@ export function CalendarHeatmap({ days, thresholds }: { days: CalendarDay[]; thr
                     {formatMonthIndex(Number(item.day.date.slice(5, 7)) - 1)}
                   </text>
                 ))}
-                {WEEKDAY_LABELS.map((label, row) =>
+                {(locale === "en" ? WEEKDAY_LABELS_EN : WEEKDAY_LABELS).map((label, row) =>
                   label ? (
                     <text
                       className="axis-text"
@@ -153,35 +157,35 @@ export function CalendarHeatmap({ days, thresholds }: { days: CalendarDay[]; thr
             }}
           >
             <div className="tooltip-title">
-              {formatLongDate(active.day.date)}, {active.day.dayName}
+              {formatLongDate(active.day.date)}, {dayName(active.day.dayName, locale)}
             </div>
             <div className="tooltip-row">
               <strong>{formatSpeed(active.day.eveningSpeedKmh)}</strong>
-              <span>akşam</span>
+              <span>{t("akşam", "evening")}</span>
             </div>
             <div className="tooltip-row">
               <strong>{formatSpeed(active.day.weightedAverageSpeedKmh)}</strong>
-              <span>gün geneli</span>
+              <span>{t("gün geneli", "all day")}</span>
             </div>
-            {active.day.periods ? <div className="tooltip-note">{active.day.periods}</div> : null}
+            {active.day.periods ? <div className="tooltip-note">{term(active.day.periods, locale)}</div> : null}
             {active.day.observedHours < 24 ? (
-              <div className="tooltip-note">{active.day.observedHours} saat analiz edilebilir veri</div>
+              <div className="tooltip-note">{t(`${active.day.observedHours} saat analiz edilebilir veri`, `${active.day.observedHours} hours of usable data`)}</div>
             ) : null}
           </div>
         ) : null}
       </div>
 
       <div className="scale-legend" style={{ flexWrap: "wrap" }}>
-        <span>{thresholds[0]} km/sa altı</span>
+        <span>{t(`${thresholds[0]} km/sa altı`, `below ${thresholds[0]} km/h`)}</span>
         <span className="scale-swatches" aria-hidden="true">
           {[1, 2, 3, 4, 5, 6, 7].map((level) => (
             <span key={level} style={{ background: `var(--heat-${level})` }} />
           ))}
         </span>
-        <span>{thresholds.at(-1)} km/sa üstü</span>
+        <span>{t(`${thresholds.at(-1)} km/sa üstü`, `above ${thresholds.at(-1)} km/h`)}</span>
         <span className="legend-item" style={{ marginLeft: 12 }}>
           <span className="key-ring" aria-hidden="true" />
-          Resmî tatil
+          {t("Resmî tatil", "Public holiday")}
         </span>
       </div>
     </div>

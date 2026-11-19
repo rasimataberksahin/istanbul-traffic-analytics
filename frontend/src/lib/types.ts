@@ -60,6 +60,8 @@ export interface SpeedBand {
 export interface SlowestLocation {
   rank: number;
   geohash: string;
+  neighborhood: string | null;
+  district: string | null;
   latitude: number;
   longitude: number;
   observedHours: number;
@@ -69,6 +71,8 @@ export interface SlowestLocation {
 
 export interface CongestionPoint {
   geohash: string;
+  neighborhood: string | null;
+  district: string | null;
   latitude: number;
   longitude: number;
   averagePeakVehicleCount: number;
@@ -80,6 +84,8 @@ export interface CongestionPoint {
 export interface LocationProfile {
   location: {
     geohash: string;
+    neighborhood: string | null;
+    district: string | null;
     latitude: number;
     longitude: number;
     observationCount: number;
@@ -187,6 +193,8 @@ export interface ReliabilityPoint {
 
 export interface LocationChange {
   geohash: string;
+  neighborhood: string | null;
+  district: string | null;
   latitude: number;
   longitude: number;
   previousPeakSpeedKmh: number;

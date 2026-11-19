@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useId, useMemo, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { useChartWidth } from "@/components/charts/useChartWidth";
+import { useI18n } from "@/lib/i18n/client";
 import { linearScale, linePath, niceScale } from "@/lib/scale";
 
 export interface LineSeries {
@@ -44,6 +45,8 @@ export function LineChart({
 }: LineChartProps) {
   const { ref, width } = useChartWidth(820);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const gradientId = useId();
+  const { t, f } = useI18n();
 
   const plotWidth = Math.max(width - MARGIN.left - MARGIN.right, 40);
   const plotHeight = height - MARGIN.top - MARGIN.bottom;
@@ -91,7 +94,7 @@ export function LineChart({
 
       <div className="chart" ref={ref}>
         <svg
-          aria-label={`${ariaLabel}. Değerleri okumak için sol ve sağ ok tuşlarını kullanın.`}
+          aria-label={`${ariaLabel}. ${t("Değerleri okumak için sol ve sağ ok tuşlarını kullanın.", "Use the left and right arrow keys to read values.")}`}
           height={height}
           role="img"
           tabIndex={0}
@@ -105,7 +108,7 @@ export function LineChart({
             <g key={tick}>
               <line stroke="var(--grid)" x1={MARGIN.left} x2={MARGIN.left + plotWidth} y1={y(tick)} y2={y(tick)} />
               <text className="axis-text" dominantBaseline="middle" textAnchor="end" x={MARGIN.left - 8} y={y(tick)}>
-                {tick.toLocaleString("tr-TR")}
+                {f.formatInteger(tick)}
               </text>
             </g>
           ))}
@@ -120,11 +123,38 @@ export function LineChart({
             <line stroke="var(--axis)" x1={x(activeIndex)} x2={x(activeIndex)} y1={MARGIN.top} y2={MARGIN.top + plotHeight} />
           ) : null}
 
+          {(() => {
+            // A single unbroken series gets a soft area under its line.
+            const only = series.length === 1 && !pointColors ? series[0] : undefined;
+            if (!only || only.values.some((value) => value === null)) {
+              return null;
+            }
+            const line = linePath(only.values.map((value, index) => ({ x: x(index), y: y(value ?? 0) })));
+            const bottom = MARGIN.top + plotHeight;
+            return (
+              <>
+                <defs>
+                  <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor={only.color} stopOpacity={0.22} />
+                    <stop offset="100%" stopColor={only.color} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <path
+                  className="chart-area"
+                  d={`${line}L${x(lastIndex)},${bottom}L${x(0)},${bottom}Z`}
+                  fill={`url(#${gradientId})`}
+                />
+              </>
+            );
+          })()}
+
           {series.map((item, seriesIndex) => (
             <g key={item.id}>
               <path
+                className="chart-line"
                 d={linePath(item.values.map((value, index) => (value === null ? null : { x: x(index), y: y(value) })))}
                 fill="none"
+                pathLength={1}
                 stroke={pointColors && seriesIndex === 0 ? "var(--series-muted)" : item.color}
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -189,7 +219,7 @@ export function LineChart({
               return (
                 <div className="tooltip-row" key={item.id}>
                   <span className="key-line" style={{ background: pointColors?.[activeIndex] ?? item.color }} />
-                  <strong>{value === null || value === undefined ? "Veri yok" : formatValue(value)}</strong>
+                  <strong>{value === null || value === undefined ? f.noData : formatValue(value)}</strong>
                   <span>{item.label}</span>
                 </div>
               );

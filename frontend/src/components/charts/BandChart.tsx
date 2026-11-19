@@ -2,7 +2,7 @@
 
 import { useState, type KeyboardEvent, type PointerEvent } from "react";
 import { useChartWidth } from "@/components/charts/useChartWidth";
-import { formatHour, formatSpeed } from "@/lib/format";
+import { useI18n } from "@/lib/i18n/client";
 import { linearScale, linePath, niceScale } from "@/lib/scale";
 import type { ReliabilityPoint } from "@/lib/types";
 
@@ -19,6 +19,8 @@ function areaPath(points: { x: number; low: number; high: number }[]): string {
 export function BandChart({ points }: { points: ReliabilityPoint[] }) {
   const { ref, width } = useChartWidth(820);
   const [active, setActive] = useState<number | null>(null);
+  const { t, f } = useI18n();
+  const { formatHour, formatSpeed } = f;
 
   const plotWidth = Math.max(width - MARGIN.left - MARGIN.right, 40);
   const plotHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
@@ -59,20 +61,20 @@ export function BandChart({ points }: { points: ReliabilityPoint[] }) {
       <div className="legend">
         <span className="legend-item">
           <span className="key-line" style={{ background: "var(--series-1)" }} />
-          Medyan gün
+          {t("Medyan gün", "Median day")}
         </span>
         <span className="legend-item">
           <span className="key-swatch" style={{ background: "var(--band-inner)" }} />
-          Günlerin yarısı (25-75. yüzdelik)
+          {t("Günlerin yarısı (25-75. yüzdelik)", "Half of days (25th-75th percentile)")}
         </span>
         <span className="legend-item">
           <span className="key-swatch" style={{ background: "var(--band-outer)" }} />
-          Günlerin %80&apos;i (10-90. yüzdelik)
+          {t("Günlerin %80'i (10-90. yüzdelik)", "80% of days (10th-90th percentile)")}
         </span>
       </div>
       <div className="chart" ref={ref}>
         <svg
-          aria-label="Hafta içi saatlere göre günlük hız dağılımı. Değerleri okumak için sol ve sağ ok tuşlarını kullanın."
+          aria-label={t("Hafta içi saatlere göre günlük hız dağılımı. Değerleri okumak için sol ve sağ ok tuşlarını kullanın.", "Daily speed distribution by weekday hour. Use the left and right arrow keys to read values.")}
           height={HEIGHT}
           role="img"
           tabIndex={0}
@@ -114,19 +116,19 @@ export function BandChart({ points }: { points: ReliabilityPoint[] }) {
             }}
           >
             <div className="tooltip-title">
-              {formatHour(activePoint.hourOfDay)}, {activePoint.days} hafta içi günü
+              {formatHour(activePoint.hourOfDay)}, {t(`${activePoint.days} hafta içi günü`, `${activePoint.days} weekdays`)}
             </div>
             <div className="tooltip-row">
               <strong>{formatSpeed(activePoint.p90SpeedKmh)}</strong>
-              <span>iyi gün (90.)</span>
+              <span>{t("iyi gün (90.)", "good day (90th)")}</span>
             </div>
             <div className="tooltip-row">
               <strong>{formatSpeed(activePoint.medianSpeedKmh)}</strong>
-              <span>medyan</span>
+              <span>{t("medyan", "median")}</span>
             </div>
             <div className="tooltip-row">
               <strong>{formatSpeed(activePoint.p10SpeedKmh)}</strong>
-              <span>kötü gün (10.)</span>
+              <span>{t("kötü gün (10.)", "bad day (10th)")}</span>
             </div>
           </div>
         ) : null}

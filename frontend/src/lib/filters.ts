@@ -18,12 +18,18 @@ export type RawSearchParams = Record<string, string | string[] | undefined>;
 /** The API accepts at most 366 days, which the dashboard enforces before asking. */
 export const MAX_RANGE_DAYS = 366;
 
-export const DAY_TYPE_OPTIONS: { value: DayType; label: string }[] = [
-  { value: "all", label: "Tüm günler" },
-  { value: "weekday", label: "Hafta içi" },
-  { value: "weekend", label: "Hafta sonu" },
-  { value: "holiday", label: "Resmî tatil" },
+export const DAY_TYPE_OPTIONS: { value: DayType; label: string; labelEn: string }[] = [
+  { value: "all", label: "Tüm günler", labelEn: "All days" },
+  { value: "weekday", label: "Hafta içi", labelEn: "Weekdays" },
+  { value: "weekend", label: "Hafta sonu", labelEn: "Weekends" },
+  { value: "holiday", label: "Resmî tatil", labelEn: "Public holidays" },
 ];
+
+/** Label of a day type in the reader's language. */
+export function dayTypeLabel(value: DayType, locale: "tr" | "en"): string {
+  const option = DAY_TYPE_OPTIONS.find((item) => item.value === value);
+  return option ? (locale === "en" ? option.labelEn : option.label) : value;
+}
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const GEOHASH_PATTERN = /^[0-9bcdefghjkmnpqrstuvwxyz]{6}$/;

@@ -1,16 +1,9 @@
 "use client";
 
 import { LineChart, type LineAnnotation, type LineSeries } from "@/components/charts/LineChart";
-import { formatDecimal, formatIndex, formatSpeed } from "@/lib/format";
+import { useI18n } from "@/lib/i18n/client";
 
 export type SeriesUnit = "speed" | "vehicles" | "index" | "hours";
-
-const FORMATTERS: Record<SeriesUnit, (value: number) => string> = {
-  speed: formatSpeed,
-  vehicles: (value) => `${formatDecimal(value)} araç`,
-  index: formatIndex,
-  hours: (value) => `${formatDecimal(value)} saat`,
-};
 
 interface SeriesChartProps {
   ariaLabel: string;
@@ -24,5 +17,12 @@ interface SeriesChartProps {
 
 /** Line chart that server components can render, since the formatter is picked by unit name. */
 export function SeriesChart({ unit, ...props }: SeriesChartProps) {
-  return <LineChart {...props} formatValue={FORMATTERS[unit]} />;
+  const { t, f } = useI18n();
+  const formatters: Record<SeriesUnit, (value: number) => string> = {
+    speed: f.formatSpeed,
+    vehicles: (value) => `${f.formatDecimal(value)} ${t("araç", "vehicles")}`,
+    index: f.formatIndex,
+    hours: (value) => `${f.formatDecimal(value)} ${t("saat", "hours")}`,
+  };
+  return <LineChart {...props} formatValue={formatters[unit]} />;
 }

@@ -13,7 +13,7 @@ import {
   type DashboardFilter,
   type DateRange,
 } from "@/lib/filters";
-import { formatMonth } from "@/lib/format";
+import { useI18n } from "@/lib/i18n/client";
 import type { DayType } from "@/lib/types";
 
 interface FilterFrameProps {
@@ -25,9 +25,9 @@ interface FilterFrameProps {
 }
 
 const PRESET_MONTHS = [
-  { label: "Son ay", months: 1 },
-  { label: "Son 3 ay", months: 3 },
-  { label: "Son 12 ay", months: 12 },
+  { label: "Son ay", labelEn: "1 month", months: 1 },
+  { label: "Son 3 ay", labelEn: "3 months", months: 3 },
+  { label: "Son 12 ay", labelEn: "12 months", months: 12 },
 ];
 
 /** One filter row that scopes everything below it and keeps the old view visible while loading. */
@@ -36,6 +36,7 @@ export function FilterFrame({ filter, range, months, showDayType = true, childre
   const pathname = usePathname();
   const currentParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const { locale, t, f } = useI18n();
 
   const selectedMonth =
     filter.from === monthStart(filter.from) &&
@@ -70,9 +71,9 @@ export function FilterFrame({ filter, range, months, showDayType = true, childre
 
   return (
     <>
-      <form className="filters" aria-label="Filtreler" onSubmit={(event) => event.preventDefault()}>
+      <form className="filters" aria-label={t("Filtreler", "Filters")} onSubmit={(event) => event.preventDefault()}>
         <div className="field">
-          <span className="field-label" id="donem-etiketi">Dönem</span>
+          <span className="field-label" id="donem-etiketi">{t("Dönem", "Period")}</span>
           <div className="presets" role="group" aria-labelledby="donem-etiketi">
             {PRESET_MONTHS.map((preset) => {
               const from = lastMonthsStart(preset.months, range);
@@ -83,7 +84,7 @@ export function FilterFrame({ filter, range, months, showDayType = true, childre
                   type="button"
                   onClick={() => apply({ ...filter, from, to: range.lastDate })}
                 >
-                  {preset.label}
+                  {t(preset.label, preset.labelEn)}
                 </button>
               );
             })}
@@ -91,19 +92,19 @@ export function FilterFrame({ filter, range, months, showDayType = true, childre
         </div>
 
         <label className="field">
-          Ay
+          {t("Ay", "Month")}
           <select name="month" value={selectedMonth} onChange={(event) => chooseMonth(event.target.value)}>
-            <option value="">Özel aralık</option>
+            <option value="">{t("Özel aralık", "Custom range")}</option>
             {[...months].reverse().map((month) => (
               <option key={month} value={month.slice(0, 7)}>
-                {formatMonth(month)}
+                {f.formatMonth(month)}
               </option>
             ))}
           </select>
         </label>
 
         <label className="field">
-          Başlangıç
+          {t("Başlangıç", "From")}
           <input
             max={filter.to}
             min={range.firstDate}
@@ -115,7 +116,7 @@ export function FilterFrame({ filter, range, months, showDayType = true, childre
         </label>
 
         <label className="field">
-          Bitiş
+          {t("Bitiş", "To")}
           <input
             max={range.lastDate}
             min={filter.from}
@@ -128,7 +129,7 @@ export function FilterFrame({ filter, range, months, showDayType = true, childre
 
         {showDayType ? (
           <label className="field">
-            Gün tipi
+            {t("Gün tipi", "Day type")}
             <select
               name="dayType"
               value={filter.dayType}
@@ -136,7 +137,7 @@ export function FilterFrame({ filter, range, months, showDayType = true, childre
             >
               {DAY_TYPE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
-                  {option.label}
+                  {locale === "en" ? option.labelEn : option.label}
                 </option>
               ))}
             </select>
@@ -144,7 +145,9 @@ export function FilterFrame({ filter, range, months, showDayType = true, childre
         ) : null}
 
         <span className="filter-status" role="status">
-          {isPending ? "Güncelleniyor..." : `En fazla ${MAX_RANGE_DAYS} gün seçilebilir`}
+          {isPending
+            ? t("Güncelleniyor...", "Updating...")
+            : t(`En fazla ${MAX_RANGE_DAYS} gün seçilebilir`, `Up to ${MAX_RANGE_DAYS} days`)}
         </span>
       </form>
 

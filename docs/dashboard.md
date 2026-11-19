@@ -22,8 +22,11 @@ Uygulama `http://localhost:3000` adresinde açılır. API'nin `http://127.0.0.1:
 |---|---|---|
 | `/` | Genel bakış | Seçilen dönemin göstergeleri ve bir önceki yılın aynı tarihleriyle farkı, saatlik hız, hız bantları, günlük trend, gün ve saat ısı haritası |
 | `/analiz` | Analiz raporu | Tüm ayları kapsayan 12 bölümlük uzun rapor |
-| `/harita` | Tıkanıklık haritası | Gerçek harita altlığı üzerinde hücre bazında tıkanıklık, akşam hızı ve araç yoğunluğu; 2B/3B görünüm, hızlı git düğmeleri, seçili hücrenin saatlik profili, en yavaş 15 hücre |
+| `/harita` | Tıkanıklık haritası | Gerçek harita altlığı üzerinde hücre bazında tıkanıklık, akşam hızı ve araç yoğunluğu; semt ve ilçe araması, 2B/3B görünüm, hızlı git düğmeleri, seçili semtin saatlik profili, ilçelere göre akşam tıkanıklığı, en yavaş 15 semt |
 | `/veri-hatti` | Veri hattı | Yüklenen aylar, aylık veri kapsamı, kalite işaretleri, yükleme geçmişi |
+| `/kilavuz` | Kullanım kılavuzu | Her ekranın ne gösterdiği, kontrollerin kullanımı ve grafiklerde geçen kavramların sözlüğü |
+
+Her gösterge ve grafik kartının sağ üst köşesinde bir "i" düğmesi vardır. Düğme, kartın neyi gösterdiğini ve nasıl okunacağını anlatan kısa bir açıklama açar.
 
 ### Analiz raporu bölümleri
 
@@ -57,6 +60,12 @@ Rapordaki bulgu kutuları sabit metin değildir. [`src/lib/insights.ts`](../fron
 | Altlık erişilemezse hücreler yine çizilir | Karo servisi yanıt vermezse harita düz bir zemine geçer ve bunu lejantta belirtir |
 | Renk sınıfları sunucuda hesaplanır | Haritaya her ölçü için yalnızca seviye ve ipucu metni gider, aynı bileşen iki farklı haritayı çizer. Renkler grafiklerle aynı tema değişkenlerinden okunur, koyu temada altlık da koyulaşır |
 | 3B yükseklik yakınlaştıkça kısalır | Şehir ölçeğinde fark belirgin olur, sokak ölçeğinde sütunlar yolu kapatmaz |
+| Hücreler semt adıyla gösterilir | Geohash yerine OpenStreetMap'ten gelen mahalle ve ilçe adı yazılır, geohash yalnızca küçük bir etiket olarak kalır. Adı olmayan hücreler geohash'e döner |
+| İlçe sıralaması araç ağırlıklıdır | İlçenin akşam ve gece hızları hücrelerin akşam araç sayısıyla ağırlıklandırılır, şehir geneli metriklerle aynı kural. 5'ten az hücresi olan ilçeler sıralanmaz |
+| Arama aksan duyarsızdır | "kadikoy" yazmak Kadıköy'ü bulur. Sonuç seçilince harita o semtin hücrelerine yaklaşır ve seçili ölçüde en belirgin hücreyi açar |
+| Dil seçimi çerezde tutulur | Sayfalar sunucuda seçilen dilde (TR/EN) üretilir, ek bir URL öneki gerekmez. Metinler kullanıldıkları yerde iki dilde yan yana yazılır; tarih ve sayı biçimleri `makeFormat(locale)` ile dile göre değişir. API'den Türkçe gelen gün, tatil ve dönem adları ön yüzde çevrilir |
+| Tema seçimi de çerezde tutulur | Açık, koyu veya sistem. Sunucu `<html data-theme>` özniteliğini ilk yanıtta yazdığı için sayfa açılırken tema yanıp sönmez. Harita altlığı tema değişince yeniden yüklenir |
+| Yazı tipi Geist, sunucudan servis edilir | `next/font` dosyaları derleme sırasında indirir, tarayıcı Google'a istek atmaz. Türkçe karakterler için `latin-ext` alt kümesi yüklenir |
 
 ## Veri gösterimi kuralları
 
@@ -75,5 +84,7 @@ Rapordaki bulgu kutuları sabit metin değildir. [`src/lib/insights.ts`](../fron
 - Çizgi ve bant grafikleri klavyedeki sol ve sağ ok tuşlarıyla gezilebilir.
 - Önceki yıla göre değişim, renge ek olarak ok yönü ve "iyileşme" veya "kötüleşme" kelimesiyle gösterilir.
 - Harita klavyeyle kaydırılıp yakınlaştırılabilir. En yavaş 15 hücre tablodan seçilebilir, seçilen hücreye harita kendisi gider. Diğer hücreleri seçmek için fare veya dokunma gerekir.
-- Açık ve koyu tema, işletim sistemi tercihini izler.
+- Tema üst menüden açık, koyu veya sistem olarak seçilir; varsayılan işletim sistemi tercihidir.
+- Bilgi düğmeleri klavyeyle açılır, Esc ile kapanır ve odak düğmeye döner.
+- `<html lang>` seçilen dile göre ayarlanır, böylece ekran okuyucular metni doğru dilde okur.
 - Çizgi grafiklerin ilk dört rengi, komşu seriler için renk körlüğü kontrolünden geçmiş paletten alınır.

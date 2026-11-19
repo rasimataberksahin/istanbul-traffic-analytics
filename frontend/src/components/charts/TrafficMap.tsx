@@ -10,8 +10,21 @@ import type {
   StyleSpecification,
 } from "maplibre-gl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
-import { cellBounds, cellFeatures, PLACES, type MapCell, type MapMode } from "@/lib/map";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
+import { cellBounds, cellFeatures, extrusionHeight, PLACES, type MapCell, type MapMode } from "@/lib/map";
+import { useI18n } from "@/lib/i18n/client";
+import { searchKey } from "@/lib/places";
 
 export type { MapCell, MapMode } from "@/lib/map";
 
@@ -31,6 +44,21 @@ const DEFAULT_MODE: MapMode = {
   palette: "div",
   legend: { low: "Düşük", high: "Yüksek" },
   extrude: "magnitude",
+};
+
+const LOCALE_EN = {
+  "NavigationControl.ZoomIn": "Zoom in",
+  "NavigationControl.ZoomOut": "Zoom out",
+  "NavigationControl.ResetBearing": "Reset north",
+  "FullscreenControl.Enter": "Full screen",
+  "FullscreenControl.Exit": "Exit full screen",
+  "ScaleControl.Meters": "m",
+  "ScaleControl.Kilometers": "km",
+  "AttributionControl.ToggleAttribution": "Show map sources",
+  "AttributionControl.MapFeedback": "Map feedback",
+  "CooperativeGesturesHandler.WindowsHelpText": "Use Ctrl + scroll to zoom the map",
+  "CooperativeGesturesHandler.MacHelpText": "Use ⌘ + scroll to zoom the map",
+  "CooperativeGesturesHandler.MobileHelpText": "Use two fingers to move the map",
 };
 
 const LOCALE = {
@@ -71,9 +99,50 @@ interface TrafficMapProps {
   note?: string;
   /** A shorter map for use inside long pages. */
   compact?: boolean;
+  /** Shows a box that finds neighbourhoods and districts by name. */
+  searchable?: boolean;
 }
 
-const prefersDark = () => window.matchMedia("(prefers-color-scheme: dark)").matches;
+interface SearchResult {
+  key: string;
+  label: string;
+  meta: string;
+  kind: "neighborhood" | "district";
+  indexes: number[];
+}
+
+const MAX_RESULTS = 8;
+
+/** Neighbourhood and district entries for the search box, each with the cells it covers. */
+function buildSearchIndex(cells: MapCell[], districtWord: string) {
+  const groups = new Map<string, SearchResult & { search: string }>();
+  cells.forEach((cell, index) => {
+    if (!cell.title) {
+      return;
+    }
+    const entries: [string, SearchResult["kind"], string, string][] = [
+      [`m:${cell.title}|${cell.subtitle ?? ""}`, "neighborhood", cell.title, cell.subtitle ?? ""],
+    ];
+    if (cell.subtitle && !cell.isDistrictOnly) {
+      entries.push([`d:${cell.subtitle}`, "district", cell.subtitle, districtWord]);
+    }
+    for (const [key, kind, label, meta] of entries) {
+      const group = groups.get(key) ?? { key, kind, label, meta, indexes: [], search: searchKey(`${label} ${meta}`) };
+      group.indexes.push(index);
+      groups.set(key, group);
+    }
+  });
+  return [...groups.values()];
+}
+
+/** The page theme: an explicit choice on <html data-theme>, otherwise the system setting. */
+function prefersDark() {
+  const chosen = document.documentElement.dataset.theme;
+  if (chosen === "dark" || chosen === "light") {
+    return chosen === "dark";
+  }
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
 const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function cssVar(name: string): string {
@@ -143,6 +212,7 @@ export function TrafficMap({
   cooperative = false,
   note,
   compact = false,
+  searchable = false,
 }: TrafficMapProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -161,6 +231,11 @@ export function TrafficMap({
   const [basemapFailed, setBasemapFailed] = useState(false);
   const [hover, setHover] = useState<Hover | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [activeResult, setActiveResult] = useState(0);
+  const searchId = useId();
+  const { locale, t } = useI18n();
 
   const mode = modes[Math.min(modeIndex, modes.length - 1)] ?? DEFAULT_MODE;
   // While the page reloads for a click, the clicked cell is already shown as selected.
@@ -169,6 +244,22 @@ export function TrafficMap({
   const indexById = useMemo(() => new Map(cells.map((cell, index) => [cell.id, index])), [cells]);
   const activeIndex = activeId ? (indexById.get(activeId) ?? -1) : -1;
   const hasPanel = panel !== undefined && panel !== null;
+  const searchIndex = useMemo(() => (searchable ? buildSearchIndex(cells, t("İlçe", "District")) : []), [cells, searchable, t]);
+  const results = useMemo(() => {
+    const key = searchKey(query.trim());
+    if (key.length < 2) {
+      return [];
+    }
+    return searchIndex
+      .filter((entry) => entry.search.includes(key))
+      .sort(
+        (a, b) =>
+          Number(!searchKey(a.label).startsWith(key)) - Number(!searchKey(b.label).startsWith(key)) ||
+          Number(a.kind === "neighborhood") - Number(b.kind === "neighborhood") ||
+          a.label.localeCompare(b.label, "tr"),
+      )
+      .slice(0, MAX_RESULTS);
+  }, [query, searchIndex]);
 
   // Latest values for map event handlers, which are registered once.
   const latest = useRef({ cells, mode, modeIndex, is3d, activeIndex, hasPanel });
@@ -217,6 +308,7 @@ export function TrafficMap({
     let usedFallback = false;
     const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
     let onSchemeChange: (() => void) | null = null;
+    let themeObserver: MutationObserver | null = null;
 
     void import("maplibre-gl").then(({ Map, NavigationControl, FullscreenControl, ScaleControl, AttributionControl, setWorkerUrl }) => {
       if (cancelled) {
@@ -233,7 +325,7 @@ export function TrafficMap({
         maxPitch: 70,
         attributionControl: false,
         cooperativeGestures: cooperative,
-        locale: LOCALE,
+        locale: locale === "en" ? LOCALE_EN : LOCALE,
         fadeDuration: 150,
       });
       mapRef.current = map;
@@ -294,12 +386,20 @@ export function TrafficMap({
         map.on("click", layer, onClick);
       }
 
+      let dark = prefersDark();
       onSchemeChange = () => {
+        // Swap the basemap only when the effective theme really changes.
+        if (prefersDark() === dark) {
+          return;
+        }
+        dark = prefersDark();
         usedFallback = false;
         setBasemapFailed(false);
-        map.setStyle(darkQuery.matches ? STYLE_DARK : STYLE_LIGHT);
+        map.setStyle(dark ? STYLE_DARK : STYLE_LIGHT);
       };
       darkQuery.addEventListener("change", onSchemeChange);
+      themeObserver = new MutationObserver(onSchemeChange);
+      themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     });
 
     return () => {
@@ -307,6 +407,7 @@ export function TrafficMap({
       if (onSchemeChange) {
         darkQuery.removeEventListener("change", onSchemeChange);
       }
+      themeObserver?.disconnect();
       mapRef.current?.remove();
       mapRef.current = null;
     };
@@ -505,8 +606,50 @@ export function TrafficMap({
     });
   }
 
+  /** Frames the cells of a search result and selects its strongest cell for the current measure. */
+  function focusResult(result: SearchResult) {
+    const chosen = result.indexes.map((index) => cells[index]).filter((cell): cell is MapCell => cell !== undefined);
+    const area = cellBounds(chosen);
+    if (area) {
+      mapRef.current?.fitBounds(area, {
+        padding: padding(),
+        maxZoom: result.kind === "district" ? 13 : 14.6,
+        pitch: is3d ? PITCH_3D : 0,
+        bearing: is3d ? BEARING_3D : 0,
+        duration: prefersReducedMotion() ? 0 : 1500,
+        essential: true,
+      });
+    }
+    const strongest = chosen.reduce<MapCell | undefined>((best, cell) => {
+      const height = extrusionHeight(cell.levels[modeIndex] ?? 4, mode.extrude);
+      return !best || height > extrusionHeight(best.levels[modeIndex] ?? 4, mode.extrude) ? cell : best;
+    }, undefined);
+    if (strongest) {
+      selectCell(strongest.id);
+    }
+    setQuery(result.label);
+    setSearchOpen(false);
+  }
+
+  function onSearchKey(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      setSearchOpen(true);
+      const step = event.key === "ArrowDown" ? 1 : -1;
+      setActiveResult((current) => (results.length === 0 ? 0 : (current + step + results.length) % results.length));
+    } else if (event.key === "Enter") {
+      const result = results[activeResult];
+      if (result) {
+        event.preventDefault();
+        focusResult(result);
+      }
+    } else if (event.key === "Escape") {
+      setSearchOpen(false);
+    }
+  }
+
   const hovered = hover ? cells[hover.index] : undefined;
-  const flipX = hover ? hover.x > hover.width - 230 : false;
+  const flipX = hover ? hover.x > hover.width - 250 : false;
   const flipY = hover ? hover.y < 120 : false;
 
   return (
@@ -521,8 +664,63 @@ export function TrafficMap({
         ) : null}
 
         <div className="map-toolbar" ref={toolbarRef}>
+          {searchable ? (
+            <div className="map-search">
+              <span aria-hidden="true" className="map-search-icon" />
+              <input
+                aria-activedescendant={searchOpen && results[activeResult] ? `${searchId}-${activeResult}` : undefined}
+                aria-autocomplete="list"
+                aria-controls={`${searchId}-list`}
+                aria-expanded={searchOpen && query.trim().length >= 2}
+                aria-label={t("Semt ya da ilçe ara", "Search a neighbourhood or district")}
+                autoComplete="off"
+                onBlur={() => setSearchOpen(false)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setActiveResult(0);
+                  setSearchOpen(true);
+                }}
+                onFocus={() => setSearchOpen(true)}
+                onKeyDown={onSearchKey}
+                placeholder={t("Semt ya da ilçe ara", "Search a place or district")}
+                role="combobox"
+                type="search"
+                value={query}
+              />
+              {searchOpen && query.trim().length >= 2 ? (
+                <ul className="map-search-results" id={`${searchId}-list`} role="listbox">
+                  {results.length === 0 ? (
+                    <li aria-disabled="true" aria-selected="false" className="map-search-empty" role="option">
+                      {t("Eşleşen semt yok", "No matching place")}
+                    </li>
+                  ) : (
+                    results.map((result, index) => (
+                      <li
+                        aria-selected={index === activeResult}
+                        id={`${searchId}-${index}`}
+                        key={result.key}
+                        onMouseDown={(event) => {
+                          // Keeps the input focused until the choice is applied.
+                          event.preventDefault();
+                          focusResult(result);
+                        }}
+                        onMouseEnter={() => setActiveResult(index)}
+                        role="option"
+                      >
+                        <span className="place-name">
+                          <strong>{result.label}</strong>
+                          <span>{result.meta}</span>
+                        </span>
+                        <span className="result-meta">{t(`${result.indexes.length} hücre`, `${result.indexes.length} cells`)}</span>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
           {modes.length > 1 ? (
-            <div className="map-segmented" role="group" aria-label="Haritada gösterilen ölçü">
+            <div className="map-segmented" role="group" aria-label={t("Haritada gösterilen ölçü", "Measure on the map")}>
               {modes.map((item, index) => (
                 <button
                   aria-pressed={index === modeIndex}
@@ -535,21 +733,21 @@ export function TrafficMap({
               ))}
             </div>
           ) : null}
-          <div className="map-segmented" role="group" aria-label="Görünüm">
+          <div className="map-segmented" role="group" aria-label={t("Görünüm", "View")}>
             <button aria-pressed={!is3d} onClick={() => setIs3d(false)} type="button">
-              2B
+              {t("2B", "2D")}
             </button>
             <button aria-pressed={is3d} onClick={() => setIs3d(true)} type="button">
-              3B
+              {t("3B", "3D")}
             </button>
           </div>
-          <div className="map-places" role="group" aria-label="Hızlı git">
+          <div className="map-places" role="group" aria-label={t("Hızlı git", "Go to")}>
             <button onClick={showCity} type="button">
-              Tüm şehir
+              {t("Tüm şehir", "Whole city")}
             </button>
             {PLACES.map((place) => (
               <button key={place.label} onClick={() => flyTo(place.longitude, place.latitude, place.zoom)} type="button">
-                {place.label}
+                {t(place.label, place.labelEn)}
               </button>
             ))}
           </div>
@@ -558,7 +756,7 @@ export function TrafficMap({
         <div className="map-legend">
           <div className="map-legend-title">
             {mode.label}
-            {is3d ? <span> · yükseklik de aynı ölçüyü gösterir</span> : null}
+            {is3d ? <span>{t(" · yükseklik de aynı ölçüyü gösterir", " · height shows the same measure")}</span> : null}
           </div>
           <div className="map-legend-scale" aria-hidden="true">
             {[1, 2, 3, 4, 5, 6, 7].map((level) => (
@@ -571,7 +769,7 @@ export function TrafficMap({
           </div>
           {note || basemapFailed ? (
             <div className={basemapFailed ? "map-legend-note warn" : "map-legend-note"}>
-              {basemapFailed ? "Harita altlığı yüklenemedi, yalnızca hücreler gösteriliyor." : note}
+              {basemapFailed ? t("Harita altlığı yüklenemedi, yalnızca hücreler gösteriliyor.", "The base map could not load, only the cells are shown.") : note}
             </div>
           ) : null}
         </div>
@@ -583,8 +781,9 @@ export function TrafficMap({
               transform: `translate(${flipX ? hover.x - 16 : hover.x + 16}px, ${flipY ? hover.y + 16 : hover.y - 16}px) translate(${flipX ? "-100%" : "0"}, ${flipY ? "0" : "-100%"})`,
             }}
           >
-            <div className="tooltip-title">
-              Hücre <span className="mono">{hovered.id}</span>
+            <div className="tooltip-place">
+              <strong>{hovered.title ?? `${t("Hücre", "Cell")} ${hovered.id}`}</strong>
+              <span>{hovered.subtitle ?? t("Semt adı yok", "No place name")}</span>
             </div>
             {hovered.lines.map((line) => (
               <div className="tooltip-row" key={line.label}>
@@ -592,13 +791,13 @@ export function TrafficMap({
                 <span>{line.label}</span>
               </div>
             ))}
-            {selectParam ? <div className="tooltip-note">Ayrıntı için tıklayın</div> : null}
+            {selectParam ? <div className="tooltip-note">{t("Ayrıntı için tıklayın", "Click for details")}</div> : null}
           </div>
         ) : null}
       </div>
 
       {hasPanel ? (
-        <aside aria-label="Seçili hücre" className="map-panel" aria-busy={isPending}>
+        <aside aria-label={t("Seçili hücre", "Selected cell")} className="map-panel" aria-busy={isPending}>
           {panel}
         </aside>
       ) : null}

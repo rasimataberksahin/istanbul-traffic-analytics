@@ -10,7 +10,7 @@
 |---|---|
 | **Veri** | Ocak 2023 - Ocak 2025, 25 ay, 40,1 milyon saatlik ölçüm, 2.464 konum hücresi |
 | **Hat** | Python ETL → PostgreSQL yıldız şema ve özet katman → ASP.NET Core API → Next.js dashboard |
-| **Kalite** | 223 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
+| **Kalite** | 255 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
 
 ## Öne çıkan bulgular
 
@@ -170,8 +170,11 @@ Ayrıntılar: [API dokümanı](docs/api.md)
 |---|---|
 | Genel bakış | Seçilen dönemin göstergeleri, önceki yılın aynı tarihleriyle fark, saatlik ve günlük hız |
 | Analiz raporu | 12 bölüm: aylık trend, yıllık karşılaştırma, mevsimsellik, takvim, okul ve Ramazan dönemleri, tatiller, öngörülebilirlik, bölgesel değişim |
-| Harita | 2.000'i aşkın hücrenin akşam tıkanıklığı ve hücre profili |
+| Harita | 2.000'i aşkın hücrenin akşam tıkanıklığı, semt ve ilçe araması, ilçe sıralaması, semt profili |
 | Veri hattı | Aylık kapsama, kalite işaretleri, yükleme geçmişi |
+| Kılavuz | Ekranların, kontrollerin ve kavramların açıklaması |
+
+Arayüz Türkçe ve İngilizce kullanılabilir; açık, koyu ve sistem teması vardır. Her kartın köşesindeki "i" düğmesi o kartın nasıl okunacağını anlatır.
 
 Ayrıntılar: [Dashboard dokümanı](docs/dashboard.md)
 
@@ -179,9 +182,9 @@ Ayrıntılar: [Dashboard dokümanı](docs/dashboard.md)
 
 | Bileşen | Araç | Test |
 |---|---|---:|
-| ETL | pytest, geçici PostgreSQL veritabanları | 87 |
+| ETL | pytest, geçici PostgreSQL veritabanları | 94 |
 | Backend | xUnit v3, Testcontainers | 84 |
-| Frontend | Vitest | 52 |
+| Frontend | Vitest | 77 |
 
 GitHub Actions her push ve pull request'te üç test grubunu, lint ve tip kontrolünü, üretim derlemesini ve üç Docker imajının derlenmesini çalıştırır.
 

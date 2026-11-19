@@ -1,13 +1,14 @@
 "use client";
 
 import { LineChart, type LineAnnotation, type LineSeries } from "@/components/charts/LineChart";
-import { formatDecimal, formatHour, formatSpeed } from "@/lib/format";
+import { formatHour } from "@/lib/format";
+import { useI18n } from "@/lib/i18n/client";
 import type { DayTypeComparisonPoint, HourlyPoint } from "@/lib/types";
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 const TICKS = HOURS.filter((hour) => hour % 3 === 0).map((hour) => ({ index: hour, label: formatHour(hour) }));
 
-function slowestAnnotation(series: LineSeries): LineAnnotation | null {
+function slowestAnnotation(series: LineSeries, formatDecimal: (value: number) => string): LineAnnotation | null {
   let slowest: number | null = null;
   series.values.forEach((value, index) => {
     if (value !== null && (slowest === null || value < (series.values[slowest] ?? Infinity))) {
@@ -28,6 +29,7 @@ interface HourlyChartProps {
 }
 
 export function HourlyChart({ comparison, hourly, showComparison }: HourlyChartProps) {
+  const { t, f } = useI18n();
   const byHour = <T extends { hourOfDay: number }>(points: T[], read: (point: T) => number | null) =>
     HOURS.map((hour) => {
       const point = points.find((candidate) => candidate.hourOfDay === hour);
@@ -36,18 +38,18 @@ export function HourlyChart({ comparison, hourly, showComparison }: HourlyChartP
 
   const series: LineSeries[] = showComparison
     ? [
-        { id: "weekday", label: "Hafta içi", color: "var(--series-1)", values: byHour(comparison, (point) => point.weekdaySpeedKmh) },
-        { id: "weekend", label: "Hafta sonu", color: "var(--series-2)", values: byHour(comparison, (point) => point.weekendSpeedKmh) },
+        { id: "weekday", label: t("Hafta içi", "Weekdays"), color: "var(--series-1)", values: byHour(comparison, (point) => point.weekdaySpeedKmh) },
+        { id: "weekend", label: t("Hafta sonu", "Weekends"), color: "var(--series-2)", values: byHour(comparison, (point) => point.weekendSpeedKmh) },
       ]
-    : [{ id: "speed", label: "Ortalama hız", color: "var(--series-1)", values: byHour(hourly, (point) => point.weightedAverageSpeedKmh) }];
+    : [{ id: "speed", label: t("Ortalama hız", "Average speed"), color: "var(--series-1)", values: byHour(hourly, (point) => point.weightedAverageSpeedKmh) }];
 
-  const annotation = series[0] ? slowestAnnotation(series[0]) : null;
+  const annotation = series[0] ? slowestAnnotation(series[0], f.formatDecimal) : null;
 
   return (
     <LineChart
       annotations={annotation ? [annotation] : []}
-      ariaLabel="Saatlere göre ortalama hız"
-      formatValue={formatSpeed}
+      ariaLabel={t("Saatlere göre ortalama hız", "Average speed by hour")}
+      formatValue={f.formatSpeed}
       labels={HOURS.map(formatHour)}
       series={series}
       ticks={TICKS}

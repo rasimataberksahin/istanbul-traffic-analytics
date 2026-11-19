@@ -9,7 +9,7 @@ import {
   rangeDays,
   toSearchParams,
 } from "@/lib/filters";
-import { formatHour, formatPercent, formatSigned, formatSpeed } from "@/lib/format";
+import { formatHour, formatLargeCount, formatPercent, formatSigned, formatSpeed } from "@/lib/format";
 import { changeClass, congestionClass, heatClass, linePath, niceScale } from "@/lib/scale";
 
 const range = buildRange("2023-01-01", "2025-01-31");
@@ -174,5 +174,13 @@ describe("formatting", () => {
 
   it("describes missing speed", () => {
     expect(formatSpeed(null)).toBe("Veri yok");
+  });
+});
+
+describe("formatLargeCount", () => {
+  it("writes large counts in words", () => {
+    expect(formatLargeCount(1_769_643)).toBe("1,8 milyon");
+    expect(formatLargeCount(640_400)).toBe("640 bin");
+    expect(formatLargeCount(950)).toBe("950");
   });
 });
