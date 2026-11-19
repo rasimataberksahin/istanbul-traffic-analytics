@@ -36,6 +36,7 @@ export function AppHeader({ theme: initialTheme }: { theme: Theme }) {
     { href: "/", label: t("Genel bakış", "Overview") },
     { href: "/analiz", label: t("Analiz raporu", "Report") },
     { href: "/harita", label: t("Harita", "Map") },
+    { href: "/olaylar", label: t("Olaylar", "Incidents") },
     { href: "/veri-hatti", label: t("Veri hattı", "Pipeline") },
     { href: "/kilavuz", label: t("Kılavuz", "Guide") },
   ];

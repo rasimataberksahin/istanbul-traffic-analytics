@@ -1,0 +1,61 @@
+{
+  "input": {
+    "file": "traffic_announcements_20261101.csv",
+    "sha256": "5cc2b66b18d58e2362484ff3c208333c8807b828f01bc7e666258c808eb7e820",
+    "size_bytes": 64560406
+  },
+  "output": {
+    "file": "incidents_20261101.parquet",
+    "sha256": "1151e122eb4216a00afa194d390cd9cb6a07160c90574828257a5281dd186669",
+    "quarantine_file": "incidents_rejected_20261101.csv"
+  },
+  "rows": {
+    "raw": 264274,
+    "clean": 264266,
+    "quarantined": 8,
+    "raw_equals_clean_plus_quarantined": true
+  },
+  "reject_reasons": {
+    "outside_istanbul": 8
+  },
+  "period": {
+    "first": "2013-02-12 14:29:39",
+    "last": "2026-10-31 01:42:49"
+  },
+  "categories": {
+    "accident": 126736,
+    "breakdown": 96419,
+    "roadworks": 29651,
+    "congestion": 7052,
+    "closure": 1895,
+    "other": 1370,
+    "vehicle_fire": 921,
+    "event": 134,
+    "weather": 88
+  },
+  "accident_severity": {
+    "damage": 92703,
+    "injury": 18590,
+    "chain": 14875,
+    "fatal": 532,
+    "unknown": 36
+  },
+  "parsed_share": {
+    "road": 0.9066,
+    "segment": 0.9109,
+    "lane": 0.7385,
+    "district": 0.9998,
+    "closed_lanes": 0.5258
+  },
+  "flags": {
+    "invalid_duration": 1675,
+    "invalid_response": 242628,
+    "response_recorded": 21749
+  },
+  "thresholds": {
+    "min_duration_minutes": 1,
+    "max_duration_minutes": 10080,
+    "max_response_minutes": 1440,
+    "nearest_name_km": 1.5
+  }
+}

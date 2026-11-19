@@ -22,7 +22,8 @@ Uygulama `http://localhost:3000` adresinde açılır. API'nin `http://127.0.0.1:
 |---|---|---|
 | `/` | Genel bakış | Seçilen dönemin göstergeleri ve bir önceki yılın aynı tarihleriyle farkı, saatlik hız, hız bantları, günlük trend, gün ve saat ısı haritası |
 | `/analiz` | Analiz raporu | Tüm ayları kapsayan 13 bölümlük uzun rapor |
-| `/harita` | Tıkanıklık haritası | Gerçek harita altlığı üzerinde hücre bazında tıkanıklık, akşam hızı ve araç yoğunluğu; semt ve ilçe araması, 2B/3B görünüm, hızlı git düğmeleri, seçili semtin saatlik profili, ilçelere göre akşam tıkanıklığı, en yavaş 15 semt |
+| `/harita` | Tıkanıklık haritası | Gerçek harita altlığı üzerinde hücre bazında tıkanıklık, akşam hızı, araç yoğunluğu ve aynı dönemdeki kazalar; semt ve ilçe araması, 2B/3B görünüm, hızlı git düğmeleri, seçili semtin saatlik profili, ilçelere göre akşam tıkanıklığı, en yavaş 15 semt |
+| `/olaylar` | Trafik olayları | 2013'ten bugüne kaza, arıza ve yol çalışmaları: dönem ve tür filtresi, olay haritası ve semt paneli (saatlik dağılım, en sık olay yaşanan kesimler, son olaylar), aylık trend, gün ve saat ısı haritası, yollar ve kesimler, süreler, yağmurda kaza oranı, kazanın trafiğe etkisi ve en yavaş akşamlar |
 | `/veri-hatti` | Veri hattı | Yüklenen aylar, aylık veri kapsamı, kalite işaretleri, yükleme geçmişi |
 | `/kilavuz` | Kullanım kılavuzu | Her ekranın ne gösterdiği, kontrollerin kullanımı ve grafiklerde geçen kavramların sözlüğü |
 

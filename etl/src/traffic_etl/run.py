@@ -3,7 +3,7 @@
     python -m traffic_etl.run --from 2023-01 --to 2025-01
 
 After the months are loaded, the hourly weather of the same range is fetched from
-Open-Meteo (skip with --skip-weather).
+Open-Meteo (skip with --skip-weather). --incidents also refreshes the incident history.
 
 Every step is idempotent. A verified download is not fetched again, an existing
 Parquet file is not rebuilt and an unchanged file is not loaded twice, so a
@@ -65,6 +65,7 @@ def main() -> None:
     parser.add_argument("--to", dest="last", help="Last month, YYYY-MM. Defaults to --from.")
     parser.add_argument("--force", action="store_true", help="Rebuild and reload existing months")
     parser.add_argument("--skip-weather", action="store_true", help="Do not fetch hourly weather from Open-Meteo")
+    parser.add_argument("--incidents", action="store_true", help="Also refresh the traffic incident history (UYM)")
     args = parser.parse_args()
 
     try:
@@ -90,6 +91,12 @@ def main() -> None:
         except OSError as error:
             # Weather enriches the analysis but is not needed to load traffic.
             logger.warning("Weather could not be loaded (%s). Run python -m traffic_etl.weather later.", error)
+
+    if args.incidents:
+        from traffic_etl.incidents import run_pipeline
+
+        status = run_pipeline(database_url, force=args.force, skip_weather=args.skip_weather)
+        logger.info("Incidents %s.", status)
 
 
 if __name__ == "__main__":

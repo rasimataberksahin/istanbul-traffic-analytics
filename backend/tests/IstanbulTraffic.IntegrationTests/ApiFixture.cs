@@ -75,6 +75,29 @@ public sealed class ApiFixture : IAsyncLifetime
             CASE WHEN hour::date = DATE '2024-10-02' AND EXTRACT(HOUR FROM hour) BETWEEN 17 AND 19 THEN 2 ELSE 0 END,
             0, 0
         FROM generate_series(TIMESTAMP '2024-10-01 00:00', TIMESTAMP '2024-10-31 23:00', INTERVAL '1 hour') AS hour;
+
+        -- Four announcements: an injury accident and a breakdown in traffic cells, last year's accident
+        -- on the same segment, and a news item that analyses leave out.
+        INSERT INTO traffic.fact_incident (
+            incident_id, started_at, ended_at, intervened_at, duration_min, response_min, category, source_type,
+            severity, title, road, segment, lane, is_side_road, landmark, closed_lanes, latitude, longitude,
+            geohash, neighborhood, district, is_duration_invalid, location_id) VALUES
+            (1, '2024-10-02 18:10', '2024-10-02 18:40', '2024-10-02 18:20', 30, 10, 'accident', 'Kaza Bildirimi',
+             'injury', 'D100 Merter-Zeytinburnu Yönü, sol şerit trafik kazası (yaralanmalı).', 'D100', 'Merter - Zeytinburnu',
+             'left', false, NULL, 1, 41.0421, 28.9215, 'sxk96p', 'Merkezefendi', 'Zeytinburnu', false, 1),
+            (2, '2024-10-03 08:05', '2024-10-03 08:25', NULL, 20, NULL, 'breakdown', 'Araç Arızası',
+             NULL, 'TEM Mahmutbey-Başakşehir Yönü, sağ şerit araç arızası.', 'TEM', 'Mahmutbey - Başakşehir',
+             'right', false, NULL, NULL, 41.0971, 28.7896, 'sxk3z1', NULL, NULL, false, 2),
+            (3, '2023-10-02 18:00', '2023-10-02 19:00', '2023-10-02 18:30', 60, 30, 'accident', 'Kaza Bildirimi',
+             'damage', 'D100 Merter-Zeytinburnu Yönü, sağ şerit trafik kazası (hasarlı).', 'D100', 'Merter - Zeytinburnu',
+             'right', false, NULL, 1, 41.0421, 28.9215, 'sxk96p', 'Merkezefendi', 'Zeytinburnu', false, 1),
+            (4, '2024-10-05 12:00', '2024-10-05 13:00', NULL, 60, NULL, 'other', 'Haber',
+             NULL, 'Haber', NULL, NULL, NULL, false, NULL, NULL, 41.0421, 28.9215, 'sxk96p', 'Merkezefendi', 'Zeytinburnu', false, 1);
+
+        INSERT INTO traffic.incident_load_audit (source_file, source_sha256, row_count, first_started_at, last_started_at)
+        VALUES ('incidents_20241005.parquet', repeat('c', 64), 4, '2023-10-02 18:00', '2024-10-05 12:00');
+
+        SELECT traffic.refresh_incident_impact();
         """;
 
     private readonly PostgreSqlContainer _database = new PostgreSqlBuilder("postgres:18.6").Build();

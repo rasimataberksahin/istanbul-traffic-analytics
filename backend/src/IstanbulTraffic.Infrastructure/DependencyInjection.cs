@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<ITrafficAnalyticsRepository, TrafficAnalyticsRepository>();
         services.AddScoped<ILocationAnalyticsRepository, LocationAnalyticsRepository>();
         services.AddScoped<IInsightsRepository, InsightsRepository>();
+        services.AddScoped<IIncidentsRepository, IncidentsRepository>();
         services.AddScoped<IPipelineSnapshotReader, PipelineSnapshotReader>();
         services.AddScoped<IAdminRepository, AdminRepository>();
         return services;

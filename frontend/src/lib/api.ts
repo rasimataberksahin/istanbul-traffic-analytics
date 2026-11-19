@@ -21,6 +21,17 @@ import type {
   SpeedBand,
   TrafficSummary,
   WeatherReport,
+  IncidentCategory,
+  IncidentCell,
+  IncidentCellDetail,
+  IncidentDurations,
+  IncidentMetadata,
+  IncidentMonth,
+  IncidentRoads,
+  IncidentSummary,
+  IncidentTrafficImpact,
+  IncidentWeatherEffect,
+  IncidentWeekHour,
 } from "@/lib/types";
 
 const baseUrl = process.env.API_BASE_URL ?? "http://127.0.0.1:5088";
@@ -136,3 +147,48 @@ export const getReliability = () => get<ReliabilityPoint[]>("/api/v1/insights/re
 export const getLocationChanges = () => get<LocationChangeReport>("/api/v1/insights/location-changes");
 
 export const getWeather = () => get<WeatherReport>("/api/v1/insights/weather");
+
+/** Date range and category of the incidents page. Missing dates let the API pick the latest twelve months. */
+export interface IncidentQuery {
+  from?: string;
+  to?: string;
+  category?: IncidentCategory | null;
+}
+
+const incidentQuery = (query: IncidentQuery): Record<string, QueryValue> => ({
+  from: query.from,
+  to: query.to,
+  category: query.category ?? undefined,
+});
+
+export const getIncidentMetadata = () => get<IncidentMetadata>("/api/v1/incidents/metadata");
+
+export const getIncidentSummary = (query: IncidentQuery) => get<IncidentSummary>("/api/v1/incidents/summary", incidentQuery(query));
+
+export const getIncidentMonthly = () => get<IncidentMonth[]>("/api/v1/incidents/monthly");
+
+export const getIncidentWeekHour = (query: IncidentQuery) =>
+  get<IncidentWeekHour[]>("/api/v1/incidents/week-hour", incidentQuery(query));
+
+export const getIncidentCells = (query: IncidentQuery) => get<IncidentCell[]>("/api/v1/incidents/cells", incidentQuery(query));
+
+export async function getIncidentCell(geohash: string, query: IncidentQuery): Promise<IncidentCellDetail | null> {
+  try {
+    return await get<IncidentCellDetail>(`/api/v1/incidents/cells/${encodeURIComponent(geohash)}`, incidentQuery(query));
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export const getIncidentRoads = (query: IncidentQuery) => get<IncidentRoads>("/api/v1/incidents/roads", incidentQuery(query));
+
+export const getIncidentDurations = (query: IncidentQuery) =>
+  get<IncidentDurations>("/api/v1/incidents/durations", incidentQuery(query));
+
+export const getIncidentWeather = (query: IncidentQuery) =>
+  get<IncidentWeatherEffect[]>("/api/v1/incidents/weather", incidentQuery(query));
+
+export const getIncidentTrafficImpact = () => get<IncidentTrafficImpact>("/api/v1/incidents/traffic-impact");

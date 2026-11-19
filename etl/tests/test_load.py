@@ -299,3 +299,24 @@ def test_load_applies_place_names(database_url, processed_dir, tmp_path, monkeyp
         )
     assert rows["sxk96p"] == "Merkezefendi, Zeytinburnu"
     assert rows["sxk3z1"] == ""
+
+
+def test_incidents_load_replaces_the_history_and_links_traffic_cells(database_url, processed_dir, tmp_path):
+    import pandas as pd
+
+    from test_incidents import COLUMNS, cells, raw_row
+    from traffic_etl.incidents import load as load_incidents, transform
+
+    load_month(MONTH, database_url, processed_dir)
+    traffic_cell = raw_row(announcement_id="2", latitude="41.0421752929688", longitude="28.9215087890625")
+    clean, _, _ = transform(pd.DataFrame([raw_row(), traffic_cell], columns=COLUMNS), cells())
+    parquet = tmp_path / "incidents_test.parquet"
+    clean.to_parquet(parquet, index=False)
+
+    assert load_incidents(parquet, database_url) == "loaded"
+    assert load_incidents(parquet, database_url) == "skipped"
+    with psycopg.connect(database_url) as connection:
+        rows = dict(connection.execute("SELECT incident_id, location_id IS NOT NULL FROM traffic.fact_incident").fetchall())
+        audits = connection.execute("SELECT COUNT(*) FROM traffic.incident_load_audit").fetchone()[0]
+    assert rows == {1: False, 2: True}
+    assert audits == 1

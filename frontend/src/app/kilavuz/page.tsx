@@ -10,6 +10,7 @@ import {
   MoonStars,
   Table,
   Translate as TranslateIcon,
+  Warning,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
 import type { Metadata } from "next";
@@ -74,6 +75,20 @@ export default async function GuidePage() {
         t("Üç ölçü: tıkanıklık, akşam hızı, araç yoğunluğu", "Three measures: congestion, evening speed, traffic volume"),
         t("2B ve 3B görünüm, hızlı git düğmeleri", "2D and 3D views, quick jump buttons"),
         t("İlçe sıralaması ve en yavaş 15 semt", "District ranking and the 15 slowest places"),
+      ],
+    },
+    {
+      href: "/olaylar",
+      icon: Warning,
+      title: t("Olaylar", "Incidents"),
+      text: t(
+        "Ulaşım Yönetim Merkezi'nin 2013'ten bu yana duyurduğu kaza, arıza, yol çalışması ve kapanmalar. Veri aylık güncellenir; kendi haritası ve semt paneli vardır.",
+        "Accidents, breakdowns, road works and closures announced by the Traffic Management Centre since 2013. The data is updated monthly and has its own map and area panel.",
+      ),
+      items: [
+        t("Olay haritası, en çok olay yaşanan yollar ve kesimler", "Incident map, busiest roads and segments"),
+        t("Yıllar, gün ve saat örüntüsü, olay süreleri, yağmurun etkisi", "Years, day and hour patterns, durations, the effect of rain"),
+        t("Bir kazanın trafiği ne kadar ve ne süre yavaşlattığı", "How much and for how long an accident slows traffic"),
       ],
     },
     {
@@ -200,6 +215,20 @@ export default async function GuidePage() {
       text: t(
         "Ocak 2024'te hücre başına araç bir anda yaklaşık 1,7 katına çıktı ve öyle kaldı. Hızda karşılığı olmadığı için bu, İBB'nin araç sayım yöntemindeki bir değişiklik olarak yorumlanır ve bu tarihin iki yanı hacim açısından karşılaştırılmaz.",
         "In January 2024 vehicles per cell jumped to about 1.7 times their earlier level and stayed there. Speed shows no matching change, so this is read as a change in IMM's vehicle counting and volumes are not compared across that date.",
+      ),
+    },
+    {
+      term: t("Olay ve ağır kaza", "Incident and serious accident"),
+      text: t(
+        "Olay, Ulaşım Yönetim Merkezi'nin duyurduğu kaza, arıza, yol çalışması ya da kapanmadır. Ağır kaza yaralanmalı, zincirleme ve can kaybı olan kazaları kapsar. Yalnızca duyurulan olaylar sayılır; bu, tüm kazaların resmî istatistiği değildir.",
+        "An incident is an accident, breakdown, road work or closure announced by the Traffic Management Centre. Serious accidents are injury, pile-up and fatal accidents. Only announced incidents count; this is not the official statistic of all accidents.",
+      ),
+    },
+    {
+      term: t("Kaza etkisi ve toparlanma", "Accident impact and recovery"),
+      text: t(
+        "Bir olayın hücresindeki hız, olaydan bir saat önceden üç saat sonrasına kadar, aynı hücrenin aynı ay, saat ve gün tipindeki olağan hızıyla karşılaştırılır. Fark sıfıra döndüğünde trafik toparlanmıştır.",
+        "The speed in an incident's cell, from one hour before to three hours after, is compared with the same cell's usual speed in the same month, hour and day type. When the gap returns to zero, traffic has recovered.",
       ),
     },
     {

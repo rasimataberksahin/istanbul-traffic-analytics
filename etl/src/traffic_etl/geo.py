@@ -47,3 +47,37 @@ def decode_geohash(geohash: str) -> GeohashCell | None:
         latitude_half=(lat_high - lat_low) / 2,
         longitude_half=(lon_high - lon_low) / 2,
     )
+
+
+def encode_geohash(latitude: float, longitude: float, precision: int = 6) -> str:
+    """Geohash of a point, the inverse of :func:`decode_geohash`."""
+    lat_low, lat_high = -90.0, 90.0
+    lon_low, lon_high = -180.0, 180.0
+    characters = []
+    bits = 0
+    value = 0
+    is_longitude_bit = True
+    while len(characters) < precision:
+        if is_longitude_bit:
+            middle = (lon_low + lon_high) / 2
+            if longitude >= middle:
+                value = (value << 1) | 1
+                lon_low = middle
+            else:
+                value <<= 1
+                lon_high = middle
+        else:
+            middle = (lat_low + lat_high) / 2
+            if latitude >= middle:
+                value = (value << 1) | 1
+                lat_low = middle
+            else:
+                value <<= 1
+                lat_high = middle
+        is_longitude_bit = not is_longitude_bit
+        bits += 1
+        if bits == 5:
+            characters.append(GEOHASH_ALPHABET[value])
+            bits = 0
+            value = 0
+    return "".join(characters)

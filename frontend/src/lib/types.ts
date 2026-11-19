@@ -240,3 +240,148 @@ export interface WeatherReport {
     speedChangeKmh: number | null;
   }[];
 }
+
+export type IncidentCategory =
+  | "accident"
+  | "breakdown"
+  | "vehicle_fire"
+  | "roadworks"
+  | "closure"
+  | "congestion"
+  | "event"
+  | "weather"
+  | "other";
+
+export type AccidentSeverity = "damage" | "injury" | "chain" | "fatal" | "unknown";
+
+export interface IncidentMetadata {
+  firstDate: string | null;
+  lastDate: string | null;
+  incidentCount: number;
+  loadedAt: string | null;
+  sourceFile: string | null;
+  trafficFirstDate: string | null;
+  trafficLastDate: string | null;
+}
+
+export interface IncidentCategoryCount {
+  category: IncidentCategory;
+  incidents: number;
+  medianDurationMin: number | null;
+  medianResponseMin: number | null;
+  previousYearIncidents: number | null;
+}
+
+export interface IncidentSummary {
+  filter: { from: string; to: string; category: IncidentCategory | null };
+  days: number;
+  categories: IncidentCategoryCount[];
+  accidentSeverity: { severity: AccidentSeverity; incidents: number }[];
+  closedLaneSharePct: number | null;
+}
+
+export interface IncidentMonth {
+  month: string;
+  category: IncidentCategory;
+  incidents: number;
+  severeAccidents: number;
+}
+
+export interface IncidentWeekHour {
+  isoDayOfWeek: number;
+  hourOfDay: number;
+  incidents: number;
+}
+
+export interface IncidentCell {
+  geohash: string;
+  latitude: number;
+  longitude: number;
+  neighborhood: string | null;
+  district: string | null;
+  incidents: number;
+  accidents: number;
+  severeAccidents: number;
+  breakdowns: number;
+  roadworks: number;
+  medianDurationMin: number | null;
+}
+
+export interface RoadSegment {
+  road: string;
+  segment: string | null;
+  incidents: number;
+  accidents: number;
+  severeAccidents: number;
+  breakdowns: number;
+  medianDurationMin: number | null;
+  geohash: string | null;
+}
+
+export interface IncidentCellDetail {
+  cell: IncidentCell;
+  categories: IncidentCategoryCount[];
+  hourly: number[];
+  segments: RoadSegment[];
+  latest: {
+    incidentId: number;
+    startedAt: string;
+    category: IncidentCategory;
+    severity: AccidentSeverity | null;
+    title: string;
+    durationMin: number | null;
+    closedLanes: number | null;
+  }[];
+}
+
+export interface IncidentRoads {
+  roads: { road: string; incidents: number; accidents: number; severeAccidents: number }[];
+  segments: RoadSegment[];
+}
+
+export interface IncidentDurations {
+  categories: {
+    category: IncidentCategory;
+    incidents: number;
+    medianDurationMin: number | null;
+    p75DurationMin: number | null;
+    p90DurationMin: number | null;
+    medianResponseMin: number | null;
+    responseCount: number;
+  }[];
+  yearly: { year: number; accidents: number; medianDurationMin: number | null; medianResponseMin: number | null; responseCount: number }[];
+}
+
+export interface IncidentWeatherEffect {
+  condition: WeatherConditionKind;
+  hours: number;
+  accidents: number;
+  expectedAccidents: number | null;
+  rateRatio: number | null;
+  severeRateRatio: number | null;
+}
+
+export interface IncidentTrafficImpact {
+  from: string | null;
+  to: string | null;
+  matchedIncidents: number;
+  recovery: { group: string; offsetHours: number; incidents: number; speedChangeKmh: number; speedChangePct: number }[];
+  lanes: { closedLanes: number | null; accidents: number; speedChangeKmh: number }[];
+  slowestEvenings: {
+    date: string;
+    dayName: string;
+    eveningSpeedKmh: number;
+    speedChangeKmh: number;
+    accidents: number;
+    severeAccidents: number;
+    rainMm: number | null;
+    largestIncident: string | null;
+  }[];
+  explanation: {
+    evenings: number;
+    slowWithRainPct: number;
+    slowWithSevereAccidentPct: number;
+    allWithRainPct: number;
+    allWithSevereAccidentPct: number;
+  } | null;
+}

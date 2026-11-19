@@ -8,9 +8,9 @@
 
 | | |
 |---|---|
-| **Veri** | Ocak 2023 - Ocak 2025, 25 ay, 40,1 milyon saatlik ölçüm, 2.464 konum hücresi |
+| **Veri** | Trafik: Ocak 2023 - Ocak 2025, 40,1 milyon saatlik ölçüm, 2.464 konum hücresi · Olaylar: Şubat 2013 - Ekim 2026, 264 bin kaza, arıza ve yol çalışması, aylık güncel · Hava: saatlik, 2013-2026 |
 | **Hat** | Python ETL → PostgreSQL yıldız şema ve özet katman → ASP.NET Core API → Next.js dashboard |
-| **Kalite** | 261 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
+| **Kalite** | 295 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
 
 ## Öne çıkan bulgular
 
@@ -25,6 +25,8 @@
 | Kuvvetli yağmur (saatte 1 mm üstü) şehri yavaşlatıyor ama araç sayısını değiştirmiyor; en hassas ilçeler doğudaki otoyol aksında | −2,0 km/sa, araç −%0,1 |
 | Haftanın en yavaş saati | Çarşamba 18:00, 43,9 km/sa |
 | En öngörülemez saat: iyi ve kötü günler arasındaki fark en büyük | 08:00, 43,7-51,3 km/sa |
+| Ölümlü bir kaza hücrenin hızını olay saatinde 13,6 km/sa düşürüyor ve trafik 3 saat sonra bile toparlanmamış oluyor; hasarlı kazada etki 2 saatte geçiyor | −13,6 km/sa |
+| Şehrin en yavaş akşamlarının %40'ında yağmur var, tüm akşamlarda %7; ağır kaza oranı ise neredeyse aynı | Yağmur 5,5 kat fazla |
 | 24 Ocak 2024'te hücre başına araç bir günde 1,7 katına çıktı, hızda karşılığı yok: İBB'nin sayım düzeyi değişti | 73 → 123 araç |
 
 İlk iki satır projenin en önemli bulgusudur. Şehir ortalaması araç sayısıyla ağırlıklandırılır ve Ocak 2024'teki sayım değişikliği bu ağırlıkları kaydırdı. Hücrelerin hızı yerinde sayarken ortalamanın yükselmesi, sayım artışının en çok hızlı yollarda olduğunu ve bu yolların ortalamadaki payının büyüdüğünü düşündürür. Bu yüzden rapor yıllık karşılaştırmayı üç ölçüyle gösterir: araç ağırlıklı, ilk yılın araç paylarıyla sabit ağırlıklı ve medyan hücre. Sonuç: veriye göre 2024'te İstanbul'un akşam trafiği rahatlamadı. Dashboard sayım kırılmasını veriden tespit eder ve kırılmanın iki yanı arasında hacim karşılaştırmaz. Ayrıntılı hesap [uzun dönem notebook'undadır](notebooks/02_long_term_trends.ipynb).
@@ -156,7 +158,7 @@ Ayrıntılar: [Veritabanı tasarımı](docs/database.md) · [Ekim 2024 SQL anali
 
 ## REST API
 
-.NET 10 ile yazılan katmanlı API 22 endpoint sunar: anlık filtreli analizler, 25 ayı kapsayan uzun dönem analizleri, konum analizleri ve veri hattı yönetimi.
+.NET 10 ile yazılan katmanlı API 32 endpoint sunar: anlık filtreli analizler, 25 ayı kapsayan uzun dönem analizleri, konum analizleri, 2013'ten bugüne trafik olayları ve veri hattı yönetimi.
 
 - **Dapper / Npgsql:** Özet katman ve ham tablo üzerinde elle yazılmış analitik SQL
 - **EF Core:** `admin` şemasındaki yönetim tabloları ve migration'lar
@@ -172,6 +174,7 @@ Ayrıntılar: [API dokümanı](docs/api.md)
 | Genel bakış | Seçilen dönemin göstergeleri, önceki yılın aynı tarihleriyle fark, saatlik ve günlük hız |
 | Analiz raporu | 13 bölüm: aylık trend, yıllık karşılaştırma, mevsimsellik, takvim, okul ve Ramazan dönemleri, tatiller, hava durumu, öngörülebilirlik, bölgesel değişim |
 | Harita | 2.000'i aşkın hücrenin akşam tıkanıklığı, semt ve ilçe araması, ilçe sıralaması, semt profili |
+| Olaylar | 2013'ten bugüne kaza, arıza ve yol çalışmaları: kendi haritası ve semt paneli, yıllar ve saatler, yollar ve kesimler, süreler, yağmurun etkisi, bir kazanın trafiği ne kadar ve ne süre yavaşlattığı |
 | Veri hattı | Aylık kapsama, kalite işaretleri, yükleme geçmişi |
 | Kılavuz | Ekranların, kontrollerin ve kavramların açıklaması |
 
@@ -179,13 +182,19 @@ Arayüz Türkçe ve İngilizce kullanılabilir; açık, koyu ve sistem teması v
 
 Ayrıntılar: [Dashboard dokümanı](docs/dashboard.md)
 
+## Trafik olayları
+
+İBB Ulaşım Yönetim Merkezi'nin duyurduğu 264 bin olay ayrı bir ETL hattıyla işlenir: CKAN kataloğundan indirme ve SHA-256 manifest, 20 ham türün 9 kategoriye indirilmesi, serbest metin başlıktan yol, kesim, şerit ve kaza ağırlığının ayrıştırılması, karantina, her olayın geohash hücresine ve semtine bağlanması, tek işlemde tam değiştirme ile yükleme. Yükleme sonunda her kaza ve arıza, aynı hücrenin saatlik trafik hızıyla birleştirilir ve olaydan bir saat önceden üç saat sonrasına kadar olağan hızla karşılaştırılır.
+
+Ayrıntılar: [Trafik olayları](docs/incidents.md)
+
 ## Testler
 
 | Bileşen | Araç | Test |
 |---|---|---:|
-| ETL | pytest, geçici PostgreSQL veritabanları | 98 |
-| Backend | xUnit v3, Testcontainers | 86 |
-| Frontend | Vitest | 77 |
+| ETL | pytest, geçici PostgreSQL veritabanları | 116 |
+| Backend | xUnit v3, Testcontainers | 96 |
+| Frontend | Vitest | 83 |
 
 GitHub Actions her push ve pull request'te üç test grubunu, lint ve tip kontrolünü, üretim derlemesini ve üç Docker imajının derlenmesini çalıştırır.
 

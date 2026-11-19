@@ -69,6 +69,16 @@ Bu uçlar filtre almaz ve yüklenen tüm ayları kapsar. Hepsi özet katmandan o
 | GET | `/api/v1/insights/holidays` | Her resmî tatilin çevresindeki aynı günlere göre hız ve hacim farkı |
 | GET | `/api/v1/insights/reliability` | Saat bazında günlük hızın 10, 25, 50, 75 ve 90. yüzdelikleri |
 | GET | `/api/v1/insights/location-changes` | Son 12 ay ile önceki 12 ayın hücre bazında akşam zirvesi farkı |
+| GET | `/api/v1/incidents/metadata` | Olay verisinin dönemi, olay sayısı ve son yükleme |
+| GET | `/api/v1/incidents/summary` | Kategoriye göre sayı ve medyan süre, kaza ağırlığı, geçen yılın aynı tarihleri |
+| GET | `/api/v1/incidents/monthly` | 2013'ten bugüne aylık olaylar |
+| GET | `/api/v1/incidents/week-hour` | Haftanın günü ve saate göre olaylar |
+| GET | `/api/v1/incidents/cells` | Geohash hücresine göre olaylar (harita) |
+| GET | `/api/v1/incidents/cells/{geohash}` | Bir hücrenin kategorileri, saatleri, kesimleri ve son olayları |
+| GET | `/api/v1/incidents/roads` | Yollara göre olaylar ve en çok olay yaşanan kesimler |
+| GET | `/api/v1/incidents/durations` | Kategoriye ve yıla göre olay ve müdahale süreleri |
+| GET | `/api/v1/incidents/weather` | Yağmur ve karda kaza oranı, aynı ay ve saatin kuru saatlerine göre |
+| GET | `/api/v1/incidents/traffic-impact` | Olay öncesi ve sonrası hücre hızı, kapanan şeride göre etki, en yavaş akşamlar |
 | GET | `/api/v1/insights/weather` | Hafif yağmur, kuvvetli yağmur ve karın hız ve hacme etkisi; saatlik etki, ilçelerin yağmur hassasiyeti, en yağışlı akşamlar |
 
 Hacim, toplam araç yerine hücre ve saat başına ortalama araçla verilir, çünkü her saatte veri gönderen hücre sayısı 1.204 ile 2.434 arasında değişir. Bölgesel değişimde bir hücre, her iki dönemde de en iyi ölçülen hücrenin akşam saatlerinin en az yarısı kadar ölçülmüşse karşılaştırılır.

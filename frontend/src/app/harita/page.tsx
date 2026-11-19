@@ -4,7 +4,8 @@ import { LocationHourlyChart } from "@/components/charts/LocationHourlyChart";
 import { FilterFrame } from "@/components/FilterFrame";
 import { TrafficMap, type MapMode } from "@/components/charts/TrafficMap";
 import { ChartCard, EmptyState, InfoTip } from "@/components/ui";
-import { getCongestionMap, getLocationProfile, getMetadata, getSlowestLocations } from "@/lib/api";
+import { getCongestionMap, getIncidentCells, getLocationProfile, getMetadata, getSlowestLocations } from "@/lib/api";
+import { countThresholds } from "@/lib/incidents";
 import { buildRange, parseFilter, parseGeohash, toSearchParams, type RawSearchParams } from "@/lib/filters";
 import { makeFormat } from "@/lib/format";
 import { translator, type Translate } from "@/lib/i18n/locale";
@@ -34,6 +35,13 @@ function mapModes(t: Translate): MapMode[] {
       label: t("Araç yoğunluğu", "Traffic volume"),
       palette: "heat",
       legend: { low: t("En çok araç", "Most vehicles"), high: t("En az araç", "Fewest vehicles") },
+      extrude: "descending",
+    },
+    {
+      id: "accidents",
+      label: t("Kazalar", "Accidents"),
+      palette: "heat",
+      legend: { low: t("En çok kaza", "Most accidents"), high: t("Kaza yok", "No accidents") },
       extrude: "descending",
     },
   ];
@@ -67,7 +75,15 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
   const range = buildRange(dataset.firstDate, dataset.lastDate);
   const params = await searchParams;
   const filter = { ...parseFilter(params, range), dayType: "all" as const };
-  const [points, slowest] = await Promise.all([getCongestionMap(filter), getSlowestLocations(filter, 15)]);
+  // Accidents announced by the Traffic Management Centre in the same period, joined by cell.
+  const [points, slowest, accidentCells] = await Promise.all([
+    getCongestionMap(filter),
+    getSlowestLocations(filter, 15),
+    getIncidentCells({ from: filter.from, to: filter.to, category: "accident" }).catch(() => []),
+  ]);
+  const accidentsByCell = new Map(accidentCells.map((cell) => [cell.geohash, cell]));
+  const accidentThresholds = countThresholds(points.map((point) => accidentsByCell.get(point.geohash)?.accidents ?? 0));
+  const accidentLevel = (count: number) => (count <= 0 ? 7 : 8 - classOf(count, accidentThresholds));
 
   const selected = parseGeohash(params) ?? slowest[0]?.geohash ?? points[0]?.geohash ?? null;
   const profile = selected ? await getLocationProfile(selected, filter) : null;
@@ -122,12 +138,14 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
                     congestionClass(point.congestionIndex),
                     heatClass(point.peakSpeedKmh),
                     8 - classOf(point.averagePeakVehicleCount, volumeThresholds),
+                    accidentLevel(accidentsByCell.get(point.geohash)?.accidents ?? 0),
                   ],
                   lines: [
                     { value: formatIndex(point.congestionIndex), label: t("tıkanıklık endeksi", "congestion index") },
                     { value: formatSpeed(point.peakSpeedKmh), label: t("akşam zirvesi", "evening peak") },
                     { value: formatSpeed(point.freeFlowSpeedKmh), label: t("gece", "night") },
                     { value: formatDecimal(point.averagePeakVehicleCount), label: t("araç / saat, akşam", "vehicles / hour, evening") },
+                    { value: formatInteger(accidentsByCell.get(point.geohash)?.accidents ?? 0), label: t("kaza, dönemde", "accidents in period") },
                   ],
                 };
               })}
@@ -166,6 +184,15 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
                         </dd>
                       </div>
                     </dl>
+                    {selected ? (
+                      <p className="panel-incidents">
+                        {t(
+                          `Bu dönemde bu hücrede ${formatInteger(accidentsByCell.get(selected)?.accidents ?? 0)} kaza duyuruldu.`,
+                          `${formatInteger(accidentsByCell.get(selected)?.accidents ?? 0)} accidents were announced in this cell in the period.`,
+                        )}{" "}
+                        <Link href={`/olaylar?from=${filter.from}&to=${filter.to}&cell=${selected}#harita`}>{t("Olayları gör", "See incidents")}</Link>
+                      </p>
+                    ) : null}
                     <p className="card-subtitle">{t("Saatlik hız profili, seçili dönemin tüm günleri", "Hourly speed, all days of the selected period")}</p>
                     <LocationHourlyChart points={profile.hourlyProfile} />
                     <div className="panel-help">

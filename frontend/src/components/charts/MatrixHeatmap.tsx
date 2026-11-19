@@ -28,6 +28,8 @@ interface MatrixHeatmapProps {
   thresholds?: number[];
   rowHeight?: number;
   labelWidth?: number;
+  /** "speed": darker is slower. "count": darker means more, for incident counts. */
+  unit?: "speed" | "count";
 }
 
 /** Rows by 24 hours, colored on the sequential speed ramp. Darker is slower. */
@@ -38,11 +40,16 @@ export function MatrixHeatmap({
   thresholds = HEAT_THRESHOLDS,
   rowHeight = 16,
   labelWidth = 92,
+  unit = "speed",
 }: MatrixHeatmapProps) {
   const { ref, width } = useChartWidth(1240);
   const [active, setActive] = useState<{ rowIndex: number; hour: number } | null>(null);
   const { t, f } = useI18n();
-  const { formatDecimal, formatHour, formatSpeed, noData, speedUnit } = f;
+  const { formatDecimal, formatHour, formatSpeed, formatInteger, noData, speedUnit } = f;
+  const counts = unit === "count";
+  // Counts grow upwards, so the class is flipped to keep "darker" meaning "worse".
+  const level = (value: number) => (counts ? 8 - classOf(value, thresholds) : classOf(value, thresholds));
+  const describe = (value: number) => (counts ? t(`${formatInteger(value)} olay`, `${formatInteger(value)} incidents`) : formatSpeed(value));
   const margin = { top: 4, right: 0, bottom: 24, left: labelWidth };
 
   const values = useMemo(() => new Map(cells.map((cell) => [`${cell.row}|${cell.hour}`, cell.value])), [cells]);
@@ -86,7 +93,7 @@ export function MatrixHeatmap({
                   const value = values.get(`${row.key}|${hour}`);
                   return (
                     <rect
-                      fill={value === undefined || value === null ? "var(--missing)" : `var(--heat-${classOf(value, thresholds)})`}
+                      fill={value === undefined || value === null ? "var(--missing)" : `var(--heat-${level(value)})`}
                       height={rowHeight - 1}
                       key={hour}
                       width={Math.max(cellWidth - 1, 1)}
@@ -129,20 +136,28 @@ export function MatrixHeatmap({
               {activeRow.title}, {formatHour(active.hour)}
             </div>
             <div className="tooltip-row">
-              <strong>{activeValue === undefined || activeValue === null ? noData : formatSpeed(activeValue)}</strong>
+              <strong>{activeValue === undefined || activeValue === null ? noData : describe(activeValue)}</strong>
             </div>
           </div>
         ) : null}
       </div>
 
       <div className="scale-legend" aria-hidden="true">
-        <span>{t(`${thresholds[0]} km/sa altı`, `below ${thresholds[0]} ${speedUnit}`)}</span>
+        <span>
+          {counts
+            ? t(`${formatInteger(thresholds.at(-1) ?? 0)} ve üstü`, `${formatInteger(thresholds.at(-1) ?? 0)} or more`)
+            : t(`${thresholds[0]} km/sa altı`, `below ${thresholds[0]} ${speedUnit}`)}
+        </span>
         <span className="scale-swatches">
           {[1, 2, 3, 4, 5, 6, 7].map((level) => (
             <span key={level} style={{ background: `var(--heat-${level})` }} />
           ))}
         </span>
-        <span>{t(`${thresholds.at(-1)} km/sa üstü`, `above ${thresholds.at(-1)} ${speedUnit}`)}</span>
+        <span>
+          {counts
+            ? t(`${formatInteger(thresholds[0] ?? 0)} altı`, `below ${formatInteger(thresholds[0] ?? 0)}`)
+            : t(`${thresholds.at(-1)} km/sa üstü`, `above ${thresholds.at(-1)} ${speedUnit}`)}
+        </span>
       </div>
 
       <details className="table-toggle">
@@ -153,7 +168,7 @@ export function MatrixHeatmap({
             row.title,
             ...HOURS.map((hour) => {
               const value = values.get(`${row.key}|${hour}`);
-              return value === undefined || value === null ? "-" : formatDecimal(value);
+              return value === undefined || value === null ? "-" : counts ? formatInteger(value) : formatDecimal(value);
             }),
           ])}
         />

@@ -11,6 +11,7 @@ public static class DependencyInjection
         services.AddScoped<TrafficAnalyticsService>();
         services.AddScoped<LocationAnalyticsService>();
         services.AddScoped<InsightsService>();
+        services.AddScoped<IncidentsService>();
         services.AddScoped<PipelineService>();
         return services;
     }

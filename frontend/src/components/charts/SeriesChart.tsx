@@ -3,7 +3,7 @@
 import { LineChart, type LineAnnotation, type LineSeries } from "@/components/charts/LineChart";
 import { useI18n } from "@/lib/i18n/client";
 
-export type SeriesUnit = "speed" | "vehicles" | "index" | "hours";
+export type SeriesUnit = "speed" | "vehicles" | "index" | "hours" | "minutes" | "count";
 
 interface SeriesChartProps {
   ariaLabel: string;
@@ -23,6 +23,8 @@ export function SeriesChart({ unit, ...props }: SeriesChartProps) {
     vehicles: (value) => `${f.formatDecimal(value)} ${t("araç", "vehicles")}`,
     index: f.formatIndex,
     hours: (value) => `${f.formatDecimal(value)} ${t("saat", "hours")}`,
+    minutes: (value) => `${f.formatDecimal(value)} ${t("dk", "min")}`,
+    count: (value) => f.formatInteger(value),
   };
   return <LineChart {...props} formatValue={formatters[unit]} />;
 }

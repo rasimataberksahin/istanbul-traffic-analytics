@@ -50,6 +50,29 @@ public interface IInsightsRepository
     Task<WeatherReport> GetWeatherAsync(CancellationToken cancellationToken);
 }
 
+public interface IIncidentsRepository
+{
+    Task<IncidentMetadata> GetMetadataAsync(CancellationToken cancellationToken);
+
+    Task<IncidentSummary> GetSummaryAsync(ResolvedIncidentFilter filter, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<IncidentMonth>> GetMonthlyAsync(CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<IncidentWeekHour>> GetWeekHourAsync(ResolvedIncidentFilter filter, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<IncidentCell>> GetCellsAsync(ResolvedIncidentFilter filter, CancellationToken cancellationToken);
+
+    Task<IncidentCellDetail?> GetCellDetailAsync(string geohash, ResolvedIncidentFilter filter, CancellationToken cancellationToken);
+
+    Task<IncidentRoads> GetRoadsAsync(ResolvedIncidentFilter filter, int limit, CancellationToken cancellationToken);
+
+    Task<IncidentDurations> GetDurationsAsync(ResolvedIncidentFilter filter, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<IncidentWeatherEffect>> GetWeatherAsync(ResolvedIncidentFilter filter, CancellationToken cancellationToken);
+
+    Task<IncidentTrafficImpact> GetTrafficImpactAsync(CancellationToken cancellationToken);
+}
+
 public interface IPipelineSnapshotReader
 {
     Task<IReadOnlyList<ImportSnapshot>> ReadAsync(CancellationToken cancellationToken);
