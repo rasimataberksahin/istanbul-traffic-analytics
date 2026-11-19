@@ -1,0 +1,218 @@
+{
+  "month": "2024-01",
+  "input": {
+    "file": "traffic_density_202401.csv",
+    "sha256": "7fa685ca1bcdece4c57937c11ecacde942daf0a5a131772043c5f1bb06f784fd",
+    "size_bytes": 70971099,
+    "rows": 957453
+  },
+  "output": {
+    "file": "traffic_clean_202401.parquet",
+    "sha256": "a02d90cb7139c25e909e1350ac75a5a6e4e4e2abc169a914e5edcf7a5f239caf",
+    "size_bytes": 6702727,
+    "rows": 957453,
+    "columns": 15,
+    "quarantine_file": "traffic_rejected_202401.csv",
+    "quarantined_rows": 0
+  },
+  "reconciliation": {
+    "raw_rows_equal_clean_plus_quarantined": true
+  },
+  "reject_reasons": {},
+  "time_coverage": {
+    "expected_hours": 744,
+    "observed_hours": 406
+  },
+  "partial_hours": [
+    {
+      "observed_at": "2024-01-03 06:00:00",
+      "rows": 2259,
+      "vehicles": 74095,
+      "rows_ratio": 0.945,
+      "vehicles_ratio": 0.206
+    },
+    {
+      "observed_at": "2024-01-04 10:00:00",
+      "rows": 2342,
+      "vehicles": 102526,
+      "rows_ratio": 0.978,
+      "vehicles_ratio": 0.439
+    },
+    {
+      "observed_at": "2024-01-04 15:00:00",
+      "rows": 2309,
+      "vehicles": 63587,
+      "rows_ratio": 0.964,
+      "vehicles_ratio": 0.318
+    },
+    {
+      "observed_at": "2024-01-04 17:00:00",
+      "rows": 2351,
+      "vehicles": 130124,
+      "rows_ratio": 0.982,
+      "vehicles_ratio": 0.42
+    },
+    {
+      "observed_at": "2024-01-04 18:00:00",
+      "rows": 2359,
+      "vehicles": 147444,
+      "rows_ratio": 0.985,
+      "vehicles_ratio": 0.456
+    },
+    {
+      "observed_at": "2024-01-04 19:00:00",
+      "rows": 2362,
+      "vehicles": 158075,
+      "rows_ratio": 0.984,
+      "vehicles_ratio": 0.486
+    },
+    {
+      "observed_at": "2024-01-05 08:00:00",
+      "rows": 2347,
+      "vehicles": 103180,
+      "rows_ratio": 0.982,
+      "vehicles_ratio": 0.395
+    },
+    {
+      "observed_at": "2024-01-05 15:00:00",
+      "rows": 2348,
+      "vehicles": 99479,
+      "rows_ratio": 0.981,
+      "vehicles_ratio": 0.497
+    },
+    {
+      "observed_at": "2024-01-05 17:00:00",
+      "rows": 2353,
+      "vehicles": 152003,
+      "rows_ratio": 0.983,
+      "vehicles_ratio": 0.491
+    },
+    {
+      "observed_at": "2024-01-08 07:00:00",
+      "rows": 2318,
+      "vehicles": 100963,
+      "rows_ratio": 0.972,
+      "vehicles_ratio": 0.357
+    },
+    {
+      "observed_at": "2024-01-08 08:00:00",
+      "rows": 2309,
+      "vehicles": 82053,
+      "rows_ratio": 0.967,
+      "vehicles_ratio": 0.314
+    },
+    {
+      "observed_at": "2024-01-08 17:00:00",
+      "rows": 2362,
+      "vehicles": 128651,
+      "rows_ratio": 0.987,
+      "vehicles_ratio": 0.416
+    },
+    {
+      "observed_at": "2024-01-08 18:00:00",
+      "rows": 2349,
+      "vehicles": 144518,
+      "rows_ratio": 0.98,
+      "vehicles_ratio": 0.447
+    },
+    {
+      "observed_at": "2024-01-10 05:00:00",
+      "rows": 2236,
+      "vehicles": 74000,
+      "rows_ratio": 0.956,
+      "vehicles_ratio": 0.457
+    },
+    {
+      "observed_at": "2024-01-10 08:00:00",
+      "rows": 2345,
+      "vehicles": 109931,
+      "rows_ratio": 0.982,
+      "vehicles_ratio": 0.42
+    },
+    {
+      "observed_at": "2024-01-10 09:00:00",
+      "rows": 2315,
+      "vehicles": 92266,
+      "rows_ratio": 0.969,
+      "vehicles_ratio": 0.459
+    },
+    {
+      "observed_at": "2024-01-11 00:00:00",
+      "rows": 2164,
+      "vehicles": 38087,
+      "rows_ratio": 0.919,
+      "vehicles_ratio": 0.277
+    },
+    {
+      "observed_at": "2024-01-11 16:00:00",
+      "rows": 2208,
+      "vehicles": 40200,
+      "rows_ratio": 0.924,
+      "vehicles_ratio": 0.199
+    },
+    {
+      "observed_at": "2024-01-22 04:00:00",
+      "rows": 2037,
+      "vehicles": 22933,
+      "rows_ratio": 0.902,
+      "vehicles_ratio": 0.336
+    },
+    {
+      "observed_at": "2024-01-30 09:00:00",
+      "rows": 2353,
+      "vehicles": 89177,
+      "rows_ratio": 0.985,
+      "vehicles_ratio": 0.444
+    },
+    {
+      "observed_at": "2024-01-30 11:00:00",
+      "rows": 2189,
+      "vehicles": 32603,
+      "rows_ratio": 0.916,
+      "vehicles_ratio": 0.163
+    }
+  ],
+  "thresholds": {
+    "low_sample_vehicle_limit": 5,
+    "speed_outlier_avg_kmh": 150,
+    "suspect_max_speed_kmh": 200,
+    "partial_hour_ratio": 0.5,
+    "max_reject_rate": 0.01
+  },
+  "validation": {
+    "checks_passed": [
+      "coordinates_inside_istanbul",
+      "file_not_empty",
+      "flag_is_analysis_eligible",
+      "flag_is_low_sample",
+      "flag_is_max_speed_suspect",
+      "flag_is_partial_hour",
+      "flag_is_public_holiday",
+      "flag_is_speed_outlier",
+      "flag_is_weekend",
+      "geohash_length",
+      "no_null_values",
+      "row_count_reconciled",
+      "speed_order",
+      "speed_range",
+      "timestamp_inside_month",
+      "timestamp_on_the_hour",
+      "unique_key",
+      "vehicle_count_positive",
+      "vehicle_total_reconciled"
+    ],
+    "rows": 957453,
+    "vehicle_total": 78819515,
+    "flag_counts": {
+      "is_weekend": 283362,
+      "is_public_holiday": 56350,
+      "is_low_sample": 88890,
+      "is_speed_outlier": 33,
+      "is_max_speed_suspect": 509,
+      "is_partial_hour": 48215,
+      "is_analysis_eligible": 909208
+    },
+    "vehicle_weighted_avg_speed_kmh": 54.51,
+    "eligible_vehicle_weighted_avg_speed_kmh": 54.71
+  }
+}

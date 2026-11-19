@@ -1,0 +1,78 @@
+{
+  "month": "2025-01",
+  "input": {
+    "file": "traffic_density_202501.csv",
+    "sha256": "9bb1e4600ea6bc979ab5084446eacf974ffddf719fc25120451cf87d67ebb4e1",
+    "size_bytes": 141440536,
+    "rows": 1763963
+  },
+  "output": {
+    "file": "traffic_clean_202501.parquet",
+    "sha256": "f60c5cad21b729e97b208c97f55d5866f7fa62d0159619556b98dd5429044d9b",
+    "size_bytes": 10163602,
+    "rows": 1763963,
+    "columns": 15,
+    "quarantine_file": "traffic_rejected_202501.csv",
+    "quarantined_rows": 0
+  },
+  "reconciliation": {
+    "raw_rows_equal_clean_plus_quarantined": true
+  },
+  "reject_reasons": {},
+  "time_coverage": {
+    "expected_hours": 744,
+    "observed_hours": 744
+  },
+  "partial_hours": [
+    {
+      "observed_at": "2025-01-14 13:00:00",
+      "rows": 2297,
+      "vehicles": 51361,
+      "rows_ratio": 0.956,
+      "vehicles_ratio": 0.189
+    }
+  ],
+  "thresholds": {
+    "low_sample_vehicle_limit": 5,
+    "speed_outlier_avg_kmh": 150,
+    "suspect_max_speed_kmh": 200,
+    "partial_hour_ratio": 0.5,
+    "max_reject_rate": 0.01
+  },
+  "validation": {
+    "checks_passed": [
+      "coordinates_inside_istanbul",
+      "file_not_empty",
+      "flag_is_analysis_eligible",
+      "flag_is_low_sample",
+      "flag_is_max_speed_suspect",
+      "flag_is_partial_hour",
+      "flag_is_public_holiday",
+      "flag_is_speed_outlier",
+      "flag_is_weekend",
+      "geohash_length",
+      "no_null_values",
+      "row_count_reconciled",
+      "speed_order",
+      "speed_range",
+      "timestamp_inside_month",
+      "timestamp_on_the_hour",
+      "unique_key",
+      "vehicle_count_positive",
+      "vehicle_total_reconciled"
+    ],
+    "rows": 1763963,
+    "vehicle_total": 156929993,
+    "flag_counts": {
+      "is_weekend": 454300,
+      "is_public_holiday": 56620,
+      "is_low_sample": 133956,
+      "is_speed_outlier": 51,
+      "is_max_speed_suspect": 1402,
+      "is_partial_hour": 2297,
+      "is_analysis_eligible": 1761615
+    },
+    "vehicle_weighted_avg_speed_kmh": 54.34,
+    "eligible_vehicle_weighted_avg_speed_kmh": 54.34
+  }
+}

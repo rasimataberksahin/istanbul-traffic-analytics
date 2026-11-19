@@ -1,0 +1,12 @@
+{
+  "month": "2025-01",
+  "file_name": "traffic_density_202501.csv",
+  "source_url": "https://data.ibb.gov.tr/dataset/3ee6d744-5da2-40c8-9cd6-0e3e41f1928f/resource/57cb067b-1a0b-460b-8342-7884bd4537e8/download/traffic_density_202501.csv",
+  "resource_id": "57cb067b-1a0b-460b-8342-7884bd4537e8",
+  "resource_name": "Ocak 2025 Trafik Yoğunluk Verisi",
+  "source_last_modified": "2025-04-16T10:24:03.655950",
+  "catalog_size_bytes": 141440536,
+  "size_bytes": 141440536,
+  "sha256": "9bb1e4600ea6bc979ab5084446eacf974ffddf719fc25120451cf87d67ebb4e1",
+  "downloaded_at_utc": "2026-11-19T07:47:20+00:00"
+}

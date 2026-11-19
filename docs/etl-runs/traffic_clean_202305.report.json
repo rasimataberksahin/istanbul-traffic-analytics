@@ -1,0 +1,92 @@
+{
+  "month": "2023-05",
+  "input": {
+    "file": "traffic_density_202305.csv",
+    "sha256": "c6cdee521bea9ede49a480f5c12db13893f048095cba60f4857bcea303086ddf",
+    "size_bytes": 118977015,
+    "rows": 1604158
+  },
+  "output": {
+    "file": "traffic_clean_202305.parquet",
+    "sha256": "a20e310ea6117001d0d05405f4708ee38e409e1477bb29a6ba9d4dec8f09d663",
+    "size_bytes": 11253108,
+    "rows": 1604158,
+    "columns": 15,
+    "quarantine_file": "traffic_rejected_202305.csv",
+    "quarantined_rows": 0
+  },
+  "reconciliation": {
+    "raw_rows_equal_clean_plus_quarantined": true
+  },
+  "reject_reasons": {},
+  "time_coverage": {
+    "expected_hours": 744,
+    "observed_hours": 678
+  },
+  "partial_hours": [
+    {
+      "observed_at": "2023-05-07 00:00:00",
+      "rows": 2153,
+      "vehicles": 29504,
+      "rows_ratio": 0.914,
+      "vehicles_ratio": 0.195
+    },
+    {
+      "observed_at": "2023-05-12 00:00:00",
+      "rows": 2092,
+      "vehicles": 22849,
+      "rows_ratio": 0.888,
+      "vehicles_ratio": 0.159
+    },
+    {
+      "observed_at": "2023-05-18 00:00:00",
+      "rows": 2167,
+      "vehicles": 32550,
+      "rows_ratio": 0.919,
+      "vehicles_ratio": 0.226
+    }
+  ],
+  "thresholds": {
+    "low_sample_vehicle_limit": 5,
+    "speed_outlier_avg_kmh": 150,
+    "suspect_max_speed_kmh": 200,
+    "partial_hour_ratio": 0.5,
+    "max_reject_rate": 0.01
+  },
+  "validation": {
+    "checks_passed": [
+      "coordinates_inside_istanbul",
+      "file_not_empty",
+      "flag_is_analysis_eligible",
+      "flag_is_low_sample",
+      "flag_is_max_speed_suspect",
+      "flag_is_partial_hour",
+      "flag_is_public_holiday",
+      "flag_is_speed_outlier",
+      "flag_is_weekend",
+      "geohash_length",
+      "no_null_values",
+      "row_count_reconciled",
+      "speed_order",
+      "speed_range",
+      "timestamp_inside_month",
+      "timestamp_on_the_hour",
+      "unique_key",
+      "vehicle_count_positive",
+      "vehicle_total_reconciled"
+    ],
+    "rows": 1604158,
+    "vehicle_total": 124947368,
+    "flag_counts": {
+      "is_weekend": 427977,
+      "is_public_holiday": 113407,
+      "is_low_sample": 132162,
+      "is_speed_outlier": 111,
+      "is_max_speed_suspect": 1951,
+      "is_partial_hour": 6412,
+      "is_analysis_eligible": 1597637
+    },
+    "vehicle_weighted_avg_speed_kmh": 54.96,
+    "eligible_vehicle_weighted_avg_speed_kmh": 54.96
+  }
+}

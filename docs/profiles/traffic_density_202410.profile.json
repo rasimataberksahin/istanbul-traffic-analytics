@@ -1,0 +1,245 @@
+{
+  "file": {
+    "name": "traffic_density_202410.csv",
+    "size_bytes": 142084788,
+    "size_mb": 142.1,
+    "rows": 1769643,
+    "columns": 8,
+    "header_matches_expected": true,
+    "column_names": [
+      "DATE_TIME",
+      "LATITUDE",
+      "LONGITUDE",
+      "GEOHASH",
+      "MINIMUM_SPEED",
+      "MAXIMUM_SPEED",
+      "AVERAGE_SPEED",
+      "NUMBER_OF_VEHICLES"
+    ],
+    "average_bytes_per_row": 80.3
+  },
+  "completeness": {
+    "missing_values": {
+      "DATE_TIME": 0,
+      "LATITUDE": 0,
+      "LONGITUDE": 0,
+      "GEOHASH": 0,
+      "MINIMUM_SPEED": 0,
+      "MAXIMUM_SPEED": 0,
+      "AVERAGE_SPEED": 0,
+      "NUMBER_OF_VEHICLES": 0
+    },
+    "values_with_surrounding_whitespace": {
+      "DATE_TIME": 0,
+      "LATITUDE": 0,
+      "LONGITUDE": 0,
+      "GEOHASH": 0,
+      "MINIMUM_SPEED": 0,
+      "MAXIMUM_SPEED": 0,
+      "AVERAGE_SPEED": 0,
+      "NUMBER_OF_VEHICLES": 0
+    },
+    "unparsable_values": {
+      "DATE_TIME": 0,
+      "LATITUDE": 0,
+      "LONGITUDE": 0,
+      "MINIMUM_SPEED": 0,
+      "MAXIMUM_SPEED": 0,
+      "AVERAGE_SPEED": 0,
+      "NUMBER_OF_VEHICLES": 0
+    },
+    "non_integer_values": {
+      "MINIMUM_SPEED": 0,
+      "MAXIMUM_SPEED": 0,
+      "AVERAGE_SPEED": 0,
+      "NUMBER_OF_VEHICLES": 0
+    }
+  },
+  "numeric_summary": {
+    "MINIMUM_SPEED": {
+      "count": 1769643,
+      "min": 1,
+      "p01": 1.0,
+      "p25": 3.0,
+      "median": 10.0,
+      "mean": 22.726,
+      "p75": 42.0,
+      "p99": 84.0,
+      "max": 199,
+      "distinct": 173
+    },
+    "MAXIMUM_SPEED": {
+      "count": 1769643,
+      "min": 1,
+      "p01": 35.0,
+      "p25": 72.0,
+      "median": 101.0,
+      "mean": 102.57,
+      "p75": 131.0,
+      "p99": 185.0,
+      "max": 250,
+      "distinct": 250
+    },
+    "AVERAGE_SPEED": {
+      "count": 1769643,
+      "min": 1,
+      "p01": 16.0,
+      "p25": 33.0,
+      "median": 54.0,
+      "mean": 56.405,
+      "p75": 80.0,
+      "p99": 106.0,
+      "max": 199,
+      "distinct": 173
+    },
+    "NUMBER_OF_VEHICLES": {
+      "count": 1769643,
+      "min": 1,
+      "p01": 1.0,
+      "p25": 22.0,
+      "median": 62.0,
+      "mean": 113.865,
+      "p75": 147.0,
+      "p99": 696.0,
+      "max": 1679,
+      "distinct": 1361
+    }
+  },
+  "duplicates": {
+    "exact_duplicate_rows": 0,
+    "duplicate_datetime_geohash_rows": 0,
+    "conflicting_key_rows": 0
+  },
+  "time_coverage": {
+    "first_timestamp": "2024-10-01 00:00:00",
+    "last_timestamp": "2024-10-31 23:00:00",
+    "expected_hours": 744,
+    "observed_hours": 744,
+    "missing_hours": [],
+    "rows_per_hour": {
+      "min": 35,
+      "median": 2403.0,
+      "mean": 2378.6,
+      "max": 2423
+    },
+    "lowest_coverage_hours": {
+      "2024-10-10 10:00:00": 35,
+      "2024-10-28 03:00:00": 2185,
+      "2024-10-21 03:00:00": 2193,
+      "2024-10-07 02:00:00": 2223,
+      "2024-10-15 03:00:00": 2228,
+      "2024-10-30 03:00:00": 2233,
+      "2024-10-18 03:00:00": 2234,
+      "2024-10-29 03:00:00": 2236,
+      "2024-10-13 04:00:00": 2237,
+      "2024-10-31 03:00:00": 2237
+    },
+    "rows_by_day": {
+      "2024-10-01": 57145,
+      "2024-10-02": 57180,
+      "2024-10-03": 57187,
+      "2024-10-04": 57043,
+      "2024-10-05": 57250,
+      "2024-10-06": 56978,
+      "2024-10-07": 57124,
+      "2024-10-08": 57320,
+      "2024-10-09": 57221,
+      "2024-10-10": 54791,
+      "2024-10-11": 57287,
+      "2024-10-12": 57307,
+      "2024-10-13": 56822,
+      "2024-10-14": 57195,
+      "2024-10-15": 57187,
+      "2024-10-16": 57200,
+      "2024-10-17": 57251,
+      "2024-10-18": 57292,
+      "2024-10-19": 57192,
+      "2024-10-20": 56970,
+      "2024-10-21": 56981,
+      "2024-10-22": 57276,
+      "2024-10-23": 57274,
+      "2024-10-24": 57247,
+      "2024-10-25": 57329,
+      "2024-10-26": 57272,
+      "2024-10-27": 56947,
+      "2024-10-28": 57010,
+      "2024-10-29": 57005,
+      "2024-10-30": 57143,
+      "2024-10-31": 57217
+    },
+    "rows_by_hour_of_day": {
+      "0": 73383,
+      "1": 72418,
+      "2": 71186,
+      "3": 70277,
+      "4": 70794,
+      "5": 72767,
+      "6": 74131,
+      "7": 74512,
+      "8": 74544,
+      "9": 74654,
+      "10": 72323,
+      "11": 74750,
+      "12": 74794,
+      "13": 74708,
+      "14": 74749,
+      "15": 74707,
+      "16": 74625,
+      "17": 74694,
+      "18": 74551,
+      "19": 74586,
+      "20": 74460,
+      "21": 74131,
+      "22": 73951,
+      "23": 73948
+    }
+  },
+  "geography": {
+    "distinct_geohashes": 2458,
+    "distinct_locations": 2458,
+    "geohashes_with_multiple_coordinates": 0,
+    "invalid_geohashes": 0,
+    "rows_with_coordinates_outside_geohash_cell": 0,
+    "rows_with_coordinates_not_at_cell_center": 0,
+    "rows_per_geohash": {
+      "min": 1,
+      "median": 743.0,
+      "mean": 720.0,
+      "max": 744
+    },
+    "geohashes_seen_in_every_hour": 35,
+    "geohashes_below_10_percent_of_hours": 25,
+    "latitude_range": [
+      40.7675170898438,
+      41.3442993164063
+    ],
+    "longitude_range": [
+      27.9656982421875,
+      29.6356201171875
+    ]
+  },
+  "rule_violations": {
+    "avg_speed_above_120": 1386,
+    "avg_speed_above_150": 49,
+    "avg_speed_above_200": 0,
+    "avg_speed_above_250": 0,
+    "avg_speed_above_max_speed": 0,
+    "avg_speed_below_min_speed": 0,
+    "geohash_length_not_6": 0,
+    "max_speed_above_120": 582008,
+    "max_speed_above_150": 204008,
+    "max_speed_above_200": 3063,
+    "max_speed_above_250": 0,
+    "min_speed_greater_than_max_speed": 0,
+    "negative_speed": 0,
+    "outside_istanbul_bounds": 0,
+    "single_vehicle": 32198,
+    "single_vehicle_with_speed_range": 12357,
+    "timestamp_not_on_the_hour": 0,
+    "timestamp_outside_month": 0,
+    "zero_avg_speed": 0,
+    "zero_max_speed": 0,
+    "zero_min_speed": 0,
+    "zero_or_negative_vehicles": 0
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "month": "2023-10",
+  "file_name": "traffic_density_202310.csv",
+  "source_url": "https://data.ibb.gov.tr/dataset/3ee6d744-5da2-40c8-9cd6-0e3e41f1928f/resource/342488a2-a00f-4ba7-bb4a-345f75f1120d/download/traffic_density_202310.csv",
+  "resource_id": "342488a2-a00f-4ba7-bb4a-345f75f1120d",
+  "resource_name": "Ekim 2023 Trafik Yoğunluk Verisi",
+  "source_last_modified": "2025-01-05T16:58:13.746804",
+  "catalog_size_bytes": 115405446,
+  "size_bytes": 115405446,
+  "sha256": "5f278a542ba7308f86d908623745d66f52d908d04377b805764a39a34100d947",
+  "downloaded_at_utc": "2026-11-19T07:37:48+00:00"
+}

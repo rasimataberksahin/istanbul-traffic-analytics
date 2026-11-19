@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\IstanbulTraffic.Application\IstanbulTraffic.Application.csproj" />
+    <ProjectReference Include="..\IstanbulTraffic.Infrastructure\IstanbulTraffic.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="IstanbulTraffic.UnitTests" />
+  </ItemGroup>
+</Project>

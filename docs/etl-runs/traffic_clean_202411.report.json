@@ -1,0 +1,169 @@
+{
+  "month": "2024-11",
+  "input": {
+    "file": "traffic_density_202411.csv",
+    "sha256": "20f11179a5e094d2213c844af1d5d32e1dc7617212edf02f2da49734a6d66669",
+    "size_bytes": 137202924,
+    "rows": 1710138
+  },
+  "output": {
+    "file": "traffic_clean_202411.parquet",
+    "sha256": "b2f79ac95332932d817f4f794165503aff441a79fb9a9421fac8a88c0954a537",
+    "size_bytes": 10021188,
+    "rows": 1710138,
+    "columns": 15,
+    "quarantine_file": "traffic_rejected_202411.csv",
+    "quarantined_rows": 0
+  },
+  "reconciliation": {
+    "raw_rows_equal_clean_plus_quarantined": true
+  },
+  "reject_reasons": {},
+  "time_coverage": {
+    "expected_hours": 720,
+    "observed_hours": 720
+  },
+  "partial_hours": [
+    {
+      "observed_at": "2024-11-03 05:00:00",
+      "rows": 1475,
+      "vehicles": 6320,
+      "rows_ratio": 0.634,
+      "vehicles_ratio": 0.067
+    },
+    {
+      "observed_at": "2024-11-06 12:00:00",
+      "rows": 2307,
+      "vehicles": 52433,
+      "rows_ratio": 0.959,
+      "vehicles_ratio": 0.176
+    },
+    {
+      "observed_at": "2024-11-06 13:00:00",
+      "rows": 2374,
+      "vehicles": 109608,
+      "rows_ratio": 0.986,
+      "vehicles_ratio": 0.351
+    },
+    {
+      "observed_at": "2024-11-10 11:00:00",
+      "rows": 2355,
+      "vehicles": 104903,
+      "rows_ratio": 0.978,
+      "vehicles_ratio": 0.391
+    },
+    {
+      "observed_at": "2024-11-11 21:00:00",
+      "rows": 1535,
+      "vehicles": 4936,
+      "rows_ratio": 0.641,
+      "vehicles_ratio": 0.02
+    },
+    {
+      "observed_at": "2024-11-17 08:00:00",
+      "rows": 2373,
+      "vehicles": 147483,
+      "rows_ratio": 0.987,
+      "vehicles_ratio": 0.492
+    },
+    {
+      "observed_at": "2024-11-17 09:00:00",
+      "rows": 2395,
+      "vehicles": 141132,
+      "rows_ratio": 1.0,
+      "vehicles_ratio": 0.493
+    },
+    {
+      "observed_at": "2024-11-24 06:00:00",
+      "rows": 2344,
+      "vehicles": 105220,
+      "rows_ratio": 0.987,
+      "vehicles_ratio": 0.491
+    },
+    {
+      "observed_at": "2024-11-24 07:00:00",
+      "rows": 2365,
+      "vehicles": 135460,
+      "rows_ratio": 0.987,
+      "vehicles_ratio": 0.488
+    },
+    {
+      "observed_at": "2024-11-24 08:00:00",
+      "rows": 2364,
+      "vehicles": 137729,
+      "rows_ratio": 0.983,
+      "vehicles_ratio": 0.459
+    },
+    {
+      "observed_at": "2024-11-24 09:00:00",
+      "rows": 2394,
+      "vehicles": 136360,
+      "rows_ratio": 0.999,
+      "vehicles_ratio": 0.476
+    },
+    {
+      "observed_at": "2024-11-24 10:00:00",
+      "rows": 2393,
+      "vehicles": 136708,
+      "rows_ratio": 0.994,
+      "vehicles_ratio": 0.483
+    },
+    {
+      "observed_at": "2024-11-26 22:00:00",
+      "rows": 2256,
+      "vehicles": 40533,
+      "rows_ratio": 0.945,
+      "vehicles_ratio": 0.188
+    },
+    {
+      "observed_at": "2024-11-30 02:00:00",
+      "rows": 1750,
+      "vehicles": 8187,
+      "rows_ratio": 0.763,
+      "vehicles_ratio": 0.121
+    }
+  ],
+  "thresholds": {
+    "low_sample_vehicle_limit": 5,
+    "speed_outlier_avg_kmh": 150,
+    "suspect_max_speed_kmh": 200,
+    "partial_hour_ratio": 0.5,
+    "max_reject_rate": 0.01
+  },
+  "validation": {
+    "checks_passed": [
+      "coordinates_inside_istanbul",
+      "file_not_empty",
+      "flag_is_analysis_eligible",
+      "flag_is_low_sample",
+      "flag_is_max_speed_suspect",
+      "flag_is_partial_hour",
+      "flag_is_public_holiday",
+      "flag_is_speed_outlier",
+      "flag_is_weekend",
+      "geohash_length",
+      "no_null_values",
+      "row_count_reconciled",
+      "speed_order",
+      "speed_range",
+      "timestamp_inside_month",
+      "timestamp_on_the_hour",
+      "unique_key",
+      "vehicle_count_positive",
+      "vehicle_total_reconciled"
+    ],
+    "rows": 1710138,
+    "vehicle_total": 173661706,
+    "flag_counts": {
+      "is_weekend": 511751,
+      "is_public_holiday": 0,
+      "is_low_sample": 121183,
+      "is_speed_outlier": 63,
+      "is_max_speed_suspect": 1760,
+      "is_partial_hour": 30680,
+      "is_analysis_eligible": 1679399
+    },
+    "vehicle_weighted_avg_speed_kmh": 53.79,
+    "eligible_vehicle_weighted_avg_speed_kmh": 53.73
+  }
+}

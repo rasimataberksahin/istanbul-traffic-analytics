@@ -1,0 +1,12 @@
+{
+  "month": "2024-07",
+  "file_name": "traffic_density_202407.csv",
+  "source_url": "https://data.ibb.gov.tr/dataset/3ee6d744-5da2-40c8-9cd6-0e3e41f1928f/resource/0019216e-48e0-4cec-9ab8-93d67f66dac3/download/traffic_density_202407.csv",
+  "resource_id": "0019216e-48e0-4cec-9ab8-93d67f66dac3",
+  "resource_name": "Temmuz 2024 Trafik Yoğunluk Verisi",
+  "source_last_modified": "2025-01-05T17:09:46.539069",
+  "catalog_size_bytes": 142708382,
+  "size_bytes": 142708382,
+  "sha256": "20b81a4a74b28412756abc02982ba4a86c495f03da23bf1614f699a4cd8c97cf",
+  "downloaded_at_utc": "2026-11-19T07:44:33+00:00"
+}

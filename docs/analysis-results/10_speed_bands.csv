@@ -1,0 +1,6 @@
+band_order,speed_band,cell_hours,vehicle_observations,vehicle_share_pct
+1,0-19 km/sa,75009,7134078,3.55
+2,20-39 km/sa,535144,64757071,32.22
+3,40-59 km/sa,358510,49765979,24.76
+4,60-79 km/sa,336806,35336097,17.58
+5,80+ km/sa,454632,43970991,21.88

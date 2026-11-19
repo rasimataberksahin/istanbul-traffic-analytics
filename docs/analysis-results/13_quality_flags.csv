@@ -1,0 +1,7 @@
+quality_flag,row_count,row_share_pct
+analysis_eligible,1760101,99.461
+low_sample,113575,6.418
+public_holiday,83437,4.715
+partial_hour,9493,0.536
+max_speed_suspect,3063,0.173
+speed_outlier,49,0.003

@@ -1,0 +1,12 @@
+{
+  "month": "2024-04",
+  "file_name": "traffic_density_202404.csv",
+  "source_url": "https://data.ibb.gov.tr/dataset/3ee6d744-5da2-40c8-9cd6-0e3e41f1928f/resource/0c7d60f3-8349-4836-a1c2-56ec93cbbd50/download/traffic_density_202404.csv",
+  "resource_id": "0c7d60f3-8349-4836-a1c2-56ec93cbbd50",
+  "resource_name": "Nisan 2024 Trafik Yoğunluk Verisi",
+  "source_last_modified": "2025-01-05T17:05:38.563825",
+  "catalog_size_bytes": 119836504,
+  "size_bytes": 119836504,
+  "sha256": "baa11d3777960c806eba4807b56965e3bf156dc76625adceff7029e2cd76d2b1",
+  "downloaded_at_utc": "2026-11-19T07:41:45+00:00"
+}

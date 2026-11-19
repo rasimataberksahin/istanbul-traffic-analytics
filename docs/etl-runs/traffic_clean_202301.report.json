@@ -1,0 +1,70 @@
+{
+  "month": "2023-01",
+  "input": {
+    "file": "traffic_density_202301.csv",
+    "sha256": "596f34b053c1c8d64641b04aeeba82d33ff05b68c81b8417ac2a75cf5cc4b269",
+    "size_bytes": 128761750,
+    "rows": 1737740
+  },
+  "output": {
+    "file": "traffic_clean_202301.parquet",
+    "sha256": "88af4ab8af87ffab941f242f01e5b92b47cf58e70e45b9aa79bea0696358b7b6",
+    "size_bytes": 12151363,
+    "rows": 1737740,
+    "columns": 15,
+    "quarantine_file": "traffic_rejected_202301.csv",
+    "quarantined_rows": 0
+  },
+  "reconciliation": {
+    "raw_rows_equal_clean_plus_quarantined": true
+  },
+  "reject_reasons": {},
+  "time_coverage": {
+    "expected_hours": 744,
+    "observed_hours": 739
+  },
+  "partial_hours": [],
+  "thresholds": {
+    "low_sample_vehicle_limit": 5,
+    "speed_outlier_avg_kmh": 150,
+    "suspect_max_speed_kmh": 200,
+    "partial_hour_ratio": 0.5,
+    "max_reject_rate": 0.01
+  },
+  "validation": {
+    "checks_passed": [
+      "coordinates_inside_istanbul",
+      "file_not_empty",
+      "flag_is_analysis_eligible",
+      "flag_is_low_sample",
+      "flag_is_max_speed_suspect",
+      "flag_is_partial_hour",
+      "flag_is_public_holiday",
+      "flag_is_speed_outlier",
+      "flag_is_weekend",
+      "geohash_length",
+      "no_null_values",
+      "row_count_reconciled",
+      "speed_order",
+      "speed_range",
+      "timestamp_inside_month",
+      "timestamp_on_the_hour",
+      "unique_key",
+      "vehicle_count_positive",
+      "vehicle_total_reconciled"
+    ],
+    "rows": 1737740,
+    "vehicle_total": 126269589,
+    "flag_counts": {
+      "is_weekend": 505428,
+      "is_public_holiday": 56113,
+      "is_low_sample": 158597,
+      "is_speed_outlier": 46,
+      "is_max_speed_suspect": 1104,
+      "is_partial_hour": 0,
+      "is_analysis_eligible": 1737694
+    },
+    "vehicle_weighted_avg_speed_kmh": 53.86,
+    "eligible_vehicle_weighted_avg_speed_kmh": 53.86
+  }
+}

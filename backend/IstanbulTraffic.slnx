@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/IstanbulTraffic.Api/IstanbulTraffic.Api.csproj" />
+    <Project Path="src/IstanbulTraffic.Application/IstanbulTraffic.Application.csproj" />
+    <Project Path="src/IstanbulTraffic.Domain/IstanbulTraffic.Domain.csproj" />
+    <Project Path="src/IstanbulTraffic.Infrastructure/IstanbulTraffic.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/IstanbulTraffic.IntegrationTests/IstanbulTraffic.IntegrationTests.csproj" />
+    <Project Path="tests/IstanbulTraffic.UnitTests/IstanbulTraffic.UnitTests.csproj" />
+  </Folder>
+</Solution>

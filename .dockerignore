@@ -1,0 +1,8 @@
+# Only the ETL image builds from the repository root. Everything else, above all
+# the multi-gigabyte data/ folder, stays out of its build context.
+*
+!etl/pyproject.toml
+!etl/src/
+!database/
+**/__pycache__/
+**/*.egg-info/

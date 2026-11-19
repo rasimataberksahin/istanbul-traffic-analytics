@@ -1,0 +1,113 @@
+{
+  "month": "2024-03",
+  "input": {
+    "file": "traffic_density_202403.csv",
+    "sha256": "d003e701acd94b2f90afb1f8a7bf40ff4b72d6aabf98588a4f57e3a0b9bc2b69",
+    "size_bytes": 129625713,
+    "rows": 1745209
+  },
+  "output": {
+    "file": "traffic_clean_202403.parquet",
+    "sha256": "81c78bfff2d68c7775b348a234ec3624a3a72332b11b06980a8de986d984bf87",
+    "size_bytes": 10385368,
+    "rows": 1745209,
+    "columns": 15,
+    "quarantine_file": "traffic_rejected_202403.csv",
+    "quarantined_rows": 0
+  },
+  "reconciliation": {
+    "raw_rows_equal_clean_plus_quarantined": true
+  },
+  "reject_reasons": {},
+  "time_coverage": {
+    "expected_hours": 744,
+    "observed_hours": 733
+  },
+  "partial_hours": [
+    {
+      "observed_at": "2024-03-17 19:00:00",
+      "rows": 2136,
+      "vehicles": 21349,
+      "rows_ratio": 0.891,
+      "vehicles_ratio": 0.108
+    },
+    {
+      "observed_at": "2024-03-28 00:00:00",
+      "rows": 2219,
+      "vehicles": 50731,
+      "rows_ratio": 0.937,
+      "vehicles_ratio": 0.316
+    },
+    {
+      "observed_at": "2024-03-28 08:00:00",
+      "rows": 2302,
+      "vehicles": 59319,
+      "rows_ratio": 0.956,
+      "vehicles_ratio": 0.146
+    },
+    {
+      "observed_at": "2024-03-31 07:00:00",
+      "rows": 2363,
+      "vehicles": 114775,
+      "rows_ratio": 0.987,
+      "vehicles_ratio": 0.472
+    },
+    {
+      "observed_at": "2024-03-31 08:00:00",
+      "rows": 2379,
+      "vehicles": 117909,
+      "rows_ratio": 0.99,
+      "vehicles_ratio": 0.477
+    },
+    {
+      "observed_at": "2024-03-31 09:00:00",
+      "rows": 2307,
+      "vehicles": 50248,
+      "rows_ratio": 0.959,
+      "vehicles_ratio": 0.206
+    }
+  ],
+  "thresholds": {
+    "low_sample_vehicle_limit": 5,
+    "speed_outlier_avg_kmh": 150,
+    "suspect_max_speed_kmh": 200,
+    "partial_hour_ratio": 0.5,
+    "max_reject_rate": 0.01
+  },
+  "validation": {
+    "checks_passed": [
+      "coordinates_inside_istanbul",
+      "file_not_empty",
+      "flag_is_analysis_eligible",
+      "flag_is_low_sample",
+      "flag_is_max_speed_suspect",
+      "flag_is_partial_hour",
+      "flag_is_public_holiday",
+      "flag_is_speed_outlier",
+      "flag_is_weekend",
+      "geohash_length",
+      "no_null_values",
+      "row_count_reconciled",
+      "speed_order",
+      "speed_range",
+      "timestamp_inside_month",
+      "timestamp_on_the_hour",
+      "unique_key",
+      "vehicle_count_positive",
+      "vehicle_total_reconciled"
+    ],
+    "rows": 1745209,
+    "vehicle_total": 196859442,
+    "flag_counts": {
+      "is_weekend": 565603,
+      "is_public_holiday": 0,
+      "is_low_sample": 114822,
+      "is_speed_outlier": 53,
+      "is_max_speed_suspect": 2251,
+      "is_partial_hour": 13706,
+      "is_analysis_eligible": 1731456
+    },
+    "vehicle_weighted_avg_speed_kmh": 54.4,
+    "eligible_vehicle_weighted_avg_speed_kmh": 54.38
+  }
+}

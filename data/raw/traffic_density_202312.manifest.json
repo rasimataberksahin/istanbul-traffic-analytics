@@ -1,0 +1,12 @@
+{
+  "month": "2023-12",
+  "file_name": "traffic_density_202312.csv",
+  "source_url": "https://data.ibb.gov.tr/dataset/3ee6d744-5da2-40c8-9cd6-0e3e41f1928f/resource/aa58374d-ef6f-411f-8271-5b63eefe4fde/download/traffic_density_202312.csv",
+  "resource_id": "aa58374d-ef6f-411f-8271-5b63eefe4fde",
+  "resource_name": "Aralık 2023 Trafik Yoğunluk Verisi",
+  "source_last_modified": "2025-01-05T17:00:42.918454",
+  "catalog_size_bytes": 113239223,
+  "size_bytes": 113239223,
+  "sha256": "892c2a259aa94985cff5dcfd78fe277511c8289aa9f9005ddbf8eaee0f2f6bb0",
+  "downloaded_at_utc": "2026-11-19T07:39:05+00:00"
+}
