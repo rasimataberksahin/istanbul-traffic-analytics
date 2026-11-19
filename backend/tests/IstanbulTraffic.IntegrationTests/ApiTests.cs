@@ -129,6 +129,9 @@ public sealed class LocationEndpointTests(ApiFixture fixture)
         Assert.Equal("sxk96p", locations[0].GetProperty("geohash").GetString());
         Assert.Equal(1, locations[0].GetProperty("rank").GetInt32());
         Assert.Equal(26.67m, locations[0].GetProperty("weightedAverageSpeedKmh").GetDecimal());
+        Assert.Equal("Merkezefendi", locations[0].GetProperty("neighborhood").GetString());
+        Assert.Equal("Zeytinburnu", locations[0].GetProperty("district").GetString());
+        Assert.Equal(JsonValueKind.Null, locations[1].GetProperty("district").ValueKind);
     }
 
     [Fact]
@@ -149,6 +152,7 @@ public sealed class LocationEndpointTests(ApiFixture fixture)
 
         Assert.Equal("sxk96p", profile.GetProperty("location").GetProperty("geohash").GetString());
         Assert.Equal(744, profile.GetProperty("location").GetProperty("observationCount").GetInt64());
+        Assert.Equal("Zeytinburnu", profile.GetProperty("location").GetProperty("district").GetString());
         Assert.Equal(24, profile.GetProperty("hourlyProfile").GetArrayLength());
     }
 

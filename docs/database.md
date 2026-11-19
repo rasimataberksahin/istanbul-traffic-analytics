@@ -17,6 +17,8 @@ erDiagram
         char6 geohash UK
         double latitude
         double longitude
+        text neighborhood
+        text district
     }
     dim_date {
         date date_key PK

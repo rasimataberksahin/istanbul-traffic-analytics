@@ -28,6 +28,7 @@ from dotenv import load_dotenv
 from psycopg import sql
 
 from traffic_etl.config import CLEAN_SCHEMA, PROCESSED_DIR, PROJECT_ROOT, SCHEMA_DIR
+from traffic_etl.place_names import apply as apply_place_names
 
 logger = logging.getLogger("traffic_etl.load")
 
@@ -226,6 +227,7 @@ def load_month(
         conflicts = connection.execute(COUNT_LOCATION_CONFLICTS).fetchone()[0]
         if conflicts:
             raise LoadReconciliationError(f"{conflicts} geohashes changed their coordinates.")
+        apply_place_names(connection)
 
         connection.execute(sql.SQL("TRUNCATE {}").format(partition))
         connection.execute(INSERT_FACTS)

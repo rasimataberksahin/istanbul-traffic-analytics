@@ -280,3 +280,22 @@ def test_calendar_holidays_match_the_etl_calendar(database_url):
     full_days, _ = holiday_dates(sorted(RELIGIOUS_FULL_DAYS))
 
     assert sorted({row[0] for row in rows}) == sorted(set(full_days.date))
+
+
+def test_load_applies_place_names(database_url, processed_dir, tmp_path, monkeypatch):
+    names = tmp_path / "names.csv"
+    names.write_text(
+        "geohash,neighborhood,district,source\nsxk96p,Merkezefendi,Zeytinburnu,osm\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr("traffic_etl.place_names.NAMES_PATH", names)
+    load_month(MONTH, database_url, processed_dir)
+
+    with psycopg.connect(database_url) as connection:
+        rows = dict(
+            connection.execute(
+                "SELECT geohash, coalesce(neighborhood || ', ' || district, '') FROM traffic.dim_location"
+            ).fetchall()
+        )
+    assert rows["sxk96p"] == "Merkezefendi, Zeytinburnu"
+    assert rows["sxk3z1"] == ""

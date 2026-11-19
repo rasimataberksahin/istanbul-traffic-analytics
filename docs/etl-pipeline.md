@@ -31,6 +31,19 @@ flowchart TD
     I -- Geçti --> J[Çıktıları yayımla + çalıştırma raporu]
 ```
 
+## Semt adları
+
+Veri setindeki konumlar geohash hücreleridir (`sxk973` gibi) ve okuyucuya bir şey ifade etmez. [`traffic_etl.place_names`](../etl/src/traffic_etl/place_names.py) her hücre merkezinin hangi mahalle ve ilçede kaldığını OpenStreetMap idari sınırlarından (`admin_level` 8 ve 6) Overpass API ile bulur:
+
+```bash
+python -m traffic_etl.place_names build   # Overpass'a sorar, CSV'yi yeniden yazar
+python -m traffic_etl.place_names apply   # adları veritabanına yazar
+```
+
+- Sonuç [`database/reference/location_names.csv`](../database/reference/location_names.csv) olarak repoya eklenir. Normal bir ETL çalışması ağa çıkmaz, yükleyici her ay bu dosyadan `dim_location.neighborhood` ve `district` sütunlarını doldurur.
+- Merkezi denize düşen hücreler (köprüler, sahil yolları) 1,5 km içindeki en yakın adlandırılmış hücrenin adını alır. Dosyanın `source` sütunu bunu `nearest` olarak işaretler.
+- Mahalle adlarındaki "Mahallesi" eki atılır. Adlar © OpenStreetMap katkıcıları, ODbL lisansıyla.
+
 ## Tasarım ilkeleri
 
 | İlke | Uygulama |

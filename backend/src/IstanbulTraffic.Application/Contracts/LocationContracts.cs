@@ -14,6 +14,12 @@ public sealed record SlowestLocation
 
     public string Geohash { get; init; } = string.Empty;
 
+    /// <summary>OpenStreetMap neighbourhood (mahalle) of the cell centre, when known.</summary>
+    public string? Neighborhood { get; init; }
+
+    /// <summary>OpenStreetMap district (ilçe) of the cell centre, when known.</summary>
+    public string? District { get; init; }
+
     public decimal Latitude { get; init; }
 
     public decimal Longitude { get; init; }
@@ -28,6 +34,12 @@ public sealed record SlowestLocation
 public sealed record CongestionPoint
 {
     public string Geohash { get; init; } = string.Empty;
+
+    /// <summary>OpenStreetMap neighbourhood (mahalle) of the cell centre, when known.</summary>
+    public string? Neighborhood { get; init; }
+
+    /// <summary>OpenStreetMap district (ilçe) of the cell centre, when known.</summary>
+    public string? District { get; init; }
 
     public decimal Latitude { get; init; }
 
@@ -45,6 +57,12 @@ public sealed record CongestionPoint
 public sealed record LocationDetails
 {
     public string Geohash { get; init; } = string.Empty;
+
+    /// <summary>OpenStreetMap neighbourhood (mahalle) of the cell centre, when known.</summary>
+    public string? Neighborhood { get; init; }
+
+    /// <summary>OpenStreetMap district (ilçe) of the cell centre, when known.</summary>
+    public string? District { get; init; }
 
     public decimal Latitude { get; init; }
 

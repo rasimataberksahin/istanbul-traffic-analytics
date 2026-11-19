@@ -26,6 +26,8 @@ public sealed class ApiFixture : IAsyncLifetime
             ('sxk1v2', 41.0916137695313, 28.3612060546875),
             ('sxk3pq', 40.9927368164063, 28.8006591796875);
 
+        UPDATE traffic.dim_location SET neighborhood = 'Merkezefendi', district = 'Zeytinburnu' WHERE geohash = 'sxk96p';
+
         INSERT INTO traffic.fact_traffic_hourly (
             observed_at, location_id, min_speed_kmh, max_speed_kmh, avg_speed_kmh, vehicle_count,
             is_weekend, is_public_holiday, is_low_sample, is_speed_outlier, is_max_speed_suspect,

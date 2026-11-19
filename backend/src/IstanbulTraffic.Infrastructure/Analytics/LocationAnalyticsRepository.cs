@@ -39,6 +39,8 @@ internal sealed class LocationAnalyticsRepository(NpgsqlDataSource dataSource) :
             SELECT
                 r.rank,
                 l.geohash,
+                l.neighborhood,
+                l.district,
                 ROUND(l.latitude::numeric, 5)  AS latitude,
                 ROUND(l.longitude::numeric, 5) AS longitude,
                 r.observed_hours,
@@ -77,6 +79,8 @@ internal sealed class LocationAnalyticsRepository(NpgsqlDataSource dataSource) :
             )
             SELECT
                 l.geohash,
+                l.neighborhood,
+                l.district,
                 ROUND(l.latitude::numeric, 5)                       AS latitude,
                 ROUND(l.longitude::numeric, 5)                      AS longitude,
                 ROUND(m.average_vehicle_count, 1)                   AS average_peak_vehicle_count,
@@ -101,6 +105,8 @@ internal sealed class LocationAnalyticsRepository(NpgsqlDataSource dataSource) :
         var detailsSql = $"""
             SELECT
                 l.geohash,
+                l.neighborhood,
+                l.district,
                 ROUND(l.latitude::numeric, 5)  AS latitude,
                 ROUND(l.longitude::numeric, 5) AS longitude,
                 COUNT(f.location_id)           AS observation_count,
@@ -109,7 +115,7 @@ internal sealed class LocationAnalyticsRepository(NpgsqlDataSource dataSource) :
             LEFT JOIN traffic.fact_traffic_hourly AS f
                 ON f.location_id = l.location_id AND {where}
             WHERE l.geohash = @Geohash
-            GROUP BY l.geohash, l.latitude, l.longitude
+            GROUP BY l.geohash, l.neighborhood, l.district, l.latitude, l.longitude
             """;
 
         var hourlySql = $"""

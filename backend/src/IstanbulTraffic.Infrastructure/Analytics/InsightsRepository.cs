@@ -326,6 +326,8 @@ internal sealed class InsightsRepository(NpgsqlDataSource dataSource) : IInsight
             )
             SELECT
                 l.geohash,
+                l.neighborhood,
+                l.district,
                 ROUND(l.latitude::numeric, 5)              AS latitude,
                 ROUND(l.longitude::numeric, 5)             AS longitude,
                 ROUND(m.previous_speed, 2)                 AS previous_peak_speed_kmh,
