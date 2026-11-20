@@ -2,6 +2,7 @@ import {
   Article,
   CalendarBlank,
   ChartLineUp,
+  Command as CommandIcon,
   Cube,
   Database,
   Info,
@@ -108,6 +109,14 @@ export default async function GuidePage() {
   ];
 
   const controls: { icon: Icon; title: string; text: string }[] = [
+    {
+      icon: CommandIcon,
+      title: t("Hızlı geçiş", "Quick jump"),
+      text: t(
+        "Ctrl+K (Mac'te ⌘K) ya da / tuşu, üst çubuktaki Ara düğmesi gibi hızlı geçiş penceresini açar. Bir sayfa, rapor bölümü ya da ayar adının birkaç harfini yazın, oklarla seçip Enter'a basın. Tema ve dil de buradan değişir.",
+        "Ctrl+K (⌘K on a Mac) or the / key opens the quick jump window, as does the Search button in the top bar. Type a few letters of a page, report section or setting, pick it with the arrows and press Enter. The theme and language can be changed here too.",
+      ),
+    },
     {
       icon: CalendarBlank,
       title: t("Dönem ve gün tipi", "Period and day type"),

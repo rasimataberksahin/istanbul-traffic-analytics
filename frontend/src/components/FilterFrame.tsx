@@ -1,5 +1,6 @@
 "use client";
 
+import { useProgress } from "@/components/RouteProgress";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition, type ReactNode } from "react";
 import {
@@ -36,6 +37,7 @@ export function FilterFrame({ filter, range, months, showDayType = true, childre
   const pathname = usePathname();
   const currentParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  useProgress(isPending);
   const { locale, t, f } = useI18n();
 
   const selectedMonth =

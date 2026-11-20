@@ -1,5 +1,6 @@
 "use client";
 
+import { useProgress } from "@/components/RouteProgress";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition, type ReactNode } from "react";
 import { useI18n } from "@/lib/i18n/client";
@@ -23,6 +24,7 @@ export function IncidentFilters({ options, activeKey, category, status, children
   const pathname = usePathname();
   const params = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  useProgress(isPending);
   const { locale, t } = useI18n();
 
   function apply(changes: Record<string, string | null>) {

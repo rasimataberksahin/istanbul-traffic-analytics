@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { AppHeader } from "@/components/AppHeader";
+import { CommandPalette } from "@/components/CommandPalette";
+import { RouteProgress } from "@/components/RouteProgress";
+import { ScrollTop } from "@/components/ScrollTop";
 import { StickyFilters } from "@/components/StickyFilters";
 import { LocaleProvider } from "@/lib/i18n/client";
 import { translator } from "@/lib/i18n/locale";
@@ -48,8 +51,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             {t("İçeriğe geç", "Skip to content")}
           </a>
           <AppHeader theme={theme} />
+          <Suspense fallback={null}>
+            <RouteProgress />
+          </Suspense>
           <StickyFilters />
-          <main className="main" id="icerik">
+          <CommandPalette />
+          <ScrollTop />
+          <main className="main" id="icerik" tabIndex={-1}>
             {children}
           </main>
           <footer className="footer">

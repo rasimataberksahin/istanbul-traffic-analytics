@@ -10,7 +10,7 @@
 |---|---|
 | **Veri** | Trafik: Ocak 2023 - Ocak 2025, 40,1 milyon saatlik ölçüm, 2.464 konum hücresi · Olaylar: Şubat 2013 - Ekim 2026, 264 bin kaza, arıza ve yol çalışması, aylık güncel · Hava: saatlik, 2013-2026 |
 | **Hat** | Python ETL → PostgreSQL yıldız şema ve özet katman → ASP.NET Core API → Next.js dashboard |
-| **Kalite** | 338 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
+| **Kalite** | 345 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
 
 ## Öne çıkan bulgular
 
@@ -171,14 +171,18 @@ Ayrıntılar: [API dokümanı](docs/api.md)
 
 | Ekran | İçerik |
 |---|---|
-| Genel bakış | Seçilen dönemin göstergeleri, önceki yılın aynı tarihleriyle fark, saatlik ve günlük hız |
+| Genel bakış | Canlı 24 saat kadranı: İstanbul saatini gösteren kol, her saatin tipik yoğunluğu, bu saatin hızı ve olay sıklığı. Altında seçilen dönemin göstergeleri, önceki yılın aynı tarihleriyle fark, saatlik ve günlük hız |
 | Analiz raporu | 13 bölüm: aylık trend, yıllık karşılaştırma, mevsimsellik, takvim, okul ve Ramazan dönemleri, tatiller, hava durumu, öngörülebilirlik, bölgesel değişim |
 | Harita | 2.000'i aşkın hücrenin akşam tıkanıklığı, semt ve ilçe araması, ilçe sıralaması, semt profili |
 | Olaylar | 2013'ten bugüne kaza, arıza ve yol çalışmaları: kendi haritası ve semt paneli, yıllar ve saatler, yollar ve kesimler, süreler, yağmurun etkisi, bir kazanın trafiği ne kadar ve ne süre yavaşlattığı |
-| Veri hattı | Aylık kapsama, kalite işaretleri, yükleme geçmişi |
+| Veri hattı | İBB'den ekrana uzanan adımların akış şeması, aylık kapsama, kalite işaretleri, yükleme geçmişi |
 | Kılavuz | Ekranların, kontrollerin ve kavramların açıklaması |
 
 Arayüz Türkçe ve İngilizce kullanılabilir; açık, koyu ve sistem teması vardır. Her kartın köşesindeki "i" düğmesi o kartın nasıl okunacağını anlatır.
+
+- **Hızlı geçiş:** `Ctrl+K` (Mac'te `⌘K`) ya da `/` bir komut paleti açar. Herhangi bir sayfaya ya da rapor bölümüne atlar, tema ve dili değiştirir. Arama Türkçe karakterlere duyarsızdır ("yagmur" yazınca "Yağmur" bulunur).
+- **Canlı his:** Sayfa yüklenirken üstte bir ilerleme çubuğu, uzun sayfalarda başlığın altında okuma çubuğu görünür. Menüdeki seçili sekme yeni sayfaya kayar. Kartlar kaydırdıkça yerine oturur, sayılar akarak gelir, yüklenen sayfanın iskeleti hemen çizilir.
+- **Erişilebilirlik:** Tüm hareketler işletim sistemindeki "hareketi azalt" ayarına uyar; palet ve kontroller klavyeyle kullanılır.
 
 Ayrıntılar: [Dashboard dokümanı](docs/dashboard.md)
 
@@ -194,7 +198,7 @@ Ayrıntılar: [Trafik olayları](docs/incidents.md)
 |---|---|---:|
 | ETL | pytest, geçici PostgreSQL veritabanları | 116 |
 | Backend | xUnit v3, Testcontainers | 100 |
-| Frontend | Vitest | 122 |
+| Frontend | Vitest | 129 |
 
 GitHub Actions her push ve pull request'te üç test grubunu, lint ve tip kontrolünü, üretim derlemesini ve üç Docker imajının derlenmesini çalıştırır.
 

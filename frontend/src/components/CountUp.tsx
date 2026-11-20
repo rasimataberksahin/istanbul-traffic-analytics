@@ -51,7 +51,11 @@ export function CountUp({ text }: { text: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const shown = useRef<number | null>(null);
   // True only while hydrating server HTML; a page reached by client navigation renders false.
-  const hydrating = useSyncExternalStore(noSubscribe, () => false, () => true);
+  const hydrating = useSyncExternalStore(
+    noSubscribe,
+    () => false,
+    () => true,
+  );
   const fromServer = useRef(hydrating);
 
   useIsomorphicLayoutEffect(() => {
@@ -74,7 +78,12 @@ export function CountUp({ text }: { text: string }) {
       maximumFractionDigits: token.decimals,
       useGrouping: token.grouped,
     });
+    // Where the roll has got to: if the effect is torn down mid-way (a new value, or React's
+    // development double run), the next run starts from here instead of from the final value.
+    let reached = 0;
+    let finished = false;
     const render = (value: number) => {
+      reached = value;
       node.nodeValue = text.slice(0, token.start) + format.format(value) + text.slice(token.end);
     };
 
@@ -95,17 +104,24 @@ export function CountUp({ text }: { text: string }) {
         if (progress < 1) {
           frame = requestAnimationFrame(step);
         } else {
+          finished = true;
           node.nodeValue = text;
         }
       };
       frame = requestAnimationFrame(step);
     };
 
+    // Only stop the frames: React has already written the next value into the node.
+    const stop = () => {
+      cancelAnimationFrame(frame);
+      if (!finished) {
+        shown.current = reached;
+      }
+    };
     render(start);
     if (inView) {
       run();
-      // Only stop the frames: React has already written the next value into the node.
-      return () => cancelAnimationFrame(frame);
+      return stop;
     }
     const observer = new IntersectionObserver(
       (entries) => {
@@ -119,7 +135,7 @@ export function CountUp({ text }: { text: string }) {
     observer.observe(element);
     return () => {
       observer.disconnect();
-      cancelAnimationFrame(frame);
+      stop();
     };
   }, [text, locale]);
 

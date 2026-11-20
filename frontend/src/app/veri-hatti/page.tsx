@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PipelineFlow } from "@/components/PipelineFlow";
 import { ChartCard, ColumnBars, DataTable, EmptyState, HorizontalBars, StatTile } from "@/components/ui";
 import { getDataSources, getImportRuns, getMonthlyInsights } from "@/lib/api";
 import { makeFormat } from "@/lib/format";
@@ -24,7 +25,7 @@ const QUALITY_LABELS: Record<string, [string, string]> = {
 export default async function PipelinePage() {
   const locale = await getLocale();
   const t = translator(locale);
-  const { formatLargeCount, formatDateTime, formatDecimal, formatInteger, formatMonth, formatPercent, formatShortMonth, noData } =
+  const { formatLargeCount, formatDateTime, formatLongDate, formatDecimal, formatInteger, formatMonth, formatPercent, formatShortMonth, noData } =
     makeFormat(locale);
   const quality = (metric: string) => {
     const labels = QUALITY_LABELS[metric];
@@ -65,6 +66,42 @@ export default async function PipelinePage() {
         />
       ) : (
         <>
+          <PipelineFlow
+            label={t("Veri hattının adımları", "Steps of the pipeline")}
+            steps={[
+              {
+                title: t("İBB Açık Veri", "IMM Open Data"),
+                detail: t("Her ay bir CSV dosyası", "One CSV file a month"),
+                metric: t(`${formatInteger(runs.length)} ay`, `${formatInteger(runs.length)} months`),
+              },
+              {
+                title: t("İndirme", "Extract"),
+                detail: t("SHA-256 ile doğrulanır, değişmeyen dosya atlanır", "Checked with SHA-256, unchanged files are skipped"),
+                metric: latest.sourceFile,
+              },
+              {
+                title: t("Dönüştürme", "Transform"),
+                detail: t("Temizlenir, işaretlenir, Parquet'e yazılır", "Cleaned, flagged and written to Parquet"),
+                metric: t(`${formatInteger(partialHours)} kesintili saat`, `${formatInteger(partialHours)} partial hours`),
+              },
+              {
+                title: "PostgreSQL",
+                detail: t("Ay ay, tek işlemde yüklenir", "Loaded month by month in one transaction"),
+                metric: t(`${formatLargeCount(totalRows)} satır`, `${formatLargeCount(totalRows)} rows`),
+              },
+              {
+                title: ".NET API",
+                detail: t("Analizleri SQL'de hesaplar", "Computes the analyses in SQL"),
+                metric: t("33 endpoint", "33 endpoints"),
+              },
+              {
+                title: t("Bu dashboard", "This dashboard"),
+                detail: t("Sayfalar sunucuda çizilir, son yükleme tarihi", "Pages are rendered on the server, last load date"),
+                metric: formatLongDate(latest.loadedAt.slice(0, 10)),
+              },
+            ]}
+          />
+
           <section className="stats" aria-label={t("Son yükleme", "Latest load")}>
             <StatTile
               info={t(

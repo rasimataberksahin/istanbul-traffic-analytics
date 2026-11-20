@@ -1,5 +1,6 @@
 "use client";
 
+import { useProgress } from "@/components/RouteProgress";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import type {
@@ -221,6 +222,7 @@ export function TrafficMap({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  useProgress(isPending);
 
   const shellRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
