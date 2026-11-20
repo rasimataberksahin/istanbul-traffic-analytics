@@ -9,6 +9,7 @@ import {
   recoveryHours,
   recoveryLabel,
   recoverySeries,
+  tidyTitle,
 } from "./incidents";
 import type { IncidentTrafficImpact } from "./types";
 
@@ -72,5 +73,18 @@ describe("helpers", () => {
     });
     expect(changePct(110, 100)).toBeCloseTo(10);
     expect(changePct(5, null)).toBeNull();
+  });
+});
+
+describe("tidyTitle", () => {
+  it("drops doubled full stops and stray spaces", () => {
+    expect(tidyTitle("D100 kaza kaldırıldı. Bölgede yoğunluk devam etmektedir..")).toBe(
+      "D100 kaza kaldırıldı. Bölgede yoğunluk devam etmektedir.",
+    );
+    expect(tidyTitle("  TEM  Kurtköy yönü , sağ şerit ")).toBe("TEM Kurtköy yönü, sağ şerit");
+  });
+
+  it("keeps an ellipsis inside the text", () => {
+    expect(tidyTitle("Yol..kapalı")).toBe("Yol..kapalı");
   });
 });

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useI18n } from "@/lib/i18n/client";
 import type { StatDelta } from "@/components/ui";
+import { CountUp } from "@/components/CountUp";
 
 const ARROWS = { up: "▲", down: "▼", flat: "●" } as const;
 
@@ -86,7 +87,9 @@ export function StatTile({ label, value, note, delta, chart, info }: StatTilePro
       <div className="stat-label">{label}</div>
       {info ? <InfoTip title={label}>{info}</InfoTip> : null}
       <div className="stat-main">
-        <div className="stat-value">{value}</div>
+        <div className="stat-value">
+          <CountUp text={value} />
+        </div>
         {chart ? <div className="stat-chart">{chart}</div> : null}
       </div>
       {note ? <div className="stat-note">{note}</div> : null}

@@ -32,6 +32,7 @@ import {
 import { formatHour, makeFormat } from "@/lib/format";
 import { translator } from "@/lib/i18n/locale";
 import { getLocale } from "@/lib/i18n/server";
+import { suffix } from "@/lib/i18n/turkish";
 import { dayName, term } from "@/lib/i18n/terms";
 import {
   compareYears,
@@ -329,12 +330,12 @@ export default async function AnalysisPage() {
       <Finding
         title={
           ramadanPeak.hour !== termPeak.hour
-            ? t(`Ramazan'da trafik ${formatHour(ramadanPeak.hour)}'de zirve yapıyor`, `In Ramadan traffic peaks at ${formatHour(ramadanPeak.hour)}`)
+            ? t(`Ramazan'da trafik ${suffix(formatHour(ramadanPeak.hour), "locative")} zirve yapıyor`, `In Ramadan traffic peaks at ${formatHour(ramadanPeak.hour)}`)
             : t(`Ramazan'da iftar saatinde trafik ${formatSignedPercent(ramadanIftarDrop)}`, `In Ramadan traffic changes ${formatSignedPercent(ramadanIftarDrop)} at iftar`)
         }
       >
         {t(
-          `Okul döneminde akşam hacmi ${formatHour(termPeak.hour)}'de zirve yapar ve 19:00'a kadar ${formatSignedPercent(termIftarDrop)} değişir. Ramazan'da zirve ${formatHour(ramadanPeak.hour)}'e çekilir, iftar saati 19:00'da hücre başına araç zirveye göre ${formatSignedPercent(ramadanIftarDrop)} değişir. En yavaş saat iki dönemde de ${formatHour(ramadanLow?.hour ?? 18)}.`,
+          `Okul döneminde akşam hacmi ${suffix(formatHour(termPeak.hour), "locative")} zirve yapar ve 19:00'a kadar ${formatSignedPercent(termIftarDrop)} değişir. Ramazan'da zirve ${suffix(formatHour(ramadanPeak.hour), "dative")} çekilir, iftar saati 19:00'da hücre başına araç zirveye göre ${formatSignedPercent(ramadanIftarDrop)} değişir. En yavaş saat iki dönemde de ${formatHour(ramadanLow?.hour ?? 18)}.`,
           `In the school term evening volume peaks at ${formatHour(termPeak.hour)} and changes ${formatSignedPercent(termIftarDrop)} by 19:00. In Ramadan the peak moves to ${formatHour(ramadanPeak.hour)}, and at iftar (19:00) vehicles per cell are ${formatSignedPercent(ramadanIftarDrop)} against the peak. The slowest hour is ${formatHour(ramadanLow?.hour ?? 18)} in both periods.`,
         )}
       </Finding>
@@ -417,7 +418,7 @@ export default async function AnalysisPage() {
               {evening?.averageChange !== null && evening?.averageChange !== undefined ? (
                 <Finding
                   title={t(
-                    `Akşamlar ${evening.currentYear}'te ortalama ${formatSigned(evening.averageChange)} km/sa`,
+                    `Akşamlar ${suffix(evening.currentYear, "locative")} ortalama ${formatSigned(evening.averageChange)} km/sa`,
                     `Evenings in ${evening.currentYear}: ${formatSigned(evening.averageChange)} km/h on average`,
                   )}
                 >
@@ -432,9 +433,9 @@ export default async function AnalysisPage() {
               ) : null}
               {ramadanFinding}
               {slowerShare !== null && changes.currentFrom ? (
-                <Finding title={t(`Hücrelerin ${formatPercent(slowerShare)}'i yavaşladı`, `${formatPercent(slowerShare)} of cells got slower`)}>
+                <Finding title={t(`Hücrelerin ${suffix(formatPercent(slowerShare), "possessive")} yavaşladı`, `${formatPercent(slowerShare)} of cells got slower`)}>
                   {t(
-                    `Son 12 ayın akşam zirvesi önceki 12 ayla karşılaştırıldığında hücrelerin ${formatPercent(fasterShare ?? 0)}'i hızlandı, kalanında değişim 1 km/sa'in altında.`,
+                    `Son 12 ayın akşam zirvesi önceki 12 ayla karşılaştırıldığında hücrelerin ${suffix(formatPercent(fasterShare ?? 0), "possessive")} hızlandı, kalanında değişim 1 km/sa'in altında.`,
                     `Comparing the evening peak of the last 12 months with the 12 before, ${formatPercent(fasterShare ?? 0)} of cells got faster and the rest changed by less than 1 km/h.`,
                   )}
                 </Finding>
@@ -490,7 +491,7 @@ export default async function AnalysisPage() {
               <div className="span-4 stack">
                 <Finding title={t("Gece ile akşam arasındaki makas", "The gap between night and evening")}>
                   {t(
-                    `${formatMonth(mostCongested.month)} ayında akşam hızı gece hızının ${formatPercent((1 - (mostCongested.congestionIndex ?? 0)) * 100)}'ine indi. Bu, dönemin en yüksek tıkanıklık endeksi (${formatIndex(mostCongested.congestionIndex ?? 0)}).`,
+                    `${formatMonth(mostCongested.month)} ayında akşam hızı gece hızının ${suffix(formatPercent((1 - (mostCongested.congestionIndex ?? 0)) * 100), "possessiveDative")} indi. Bu, dönemin en yüksek tıkanıklık endeksi (${formatIndex(mostCongested.congestionIndex ?? 0)}).`,
                     `In ${formatMonth(mostCongested.month)} the evening speed fell to ${formatPercent((1 - (mostCongested.congestionIndex ?? 0)) * 100)} of the night speed, the highest congestion index of the period (${formatIndex(mostCongested.congestionIndex ?? 0)}).`,
                   )}
                 </Finding>
@@ -588,7 +589,7 @@ export default async function AnalysisPage() {
                         </>
                       }
                       subtitle={t(
-                        `Akşam zirvesinin ${evening.previousYear}'e göre aylık farkı, üç farklı ağırlıkla (${speedUnit})`,
+                        `Akşam zirvesinin ${suffix(evening.previousYear, "dative")} göre aylık farkı, üç farklı ağırlıkla (${speedUnit})`,
                         `Monthly change in the evening peak against ${evening.previousYear}, with three weightings (${speedUnit})`,
                       )}
                       table={
@@ -625,7 +626,7 @@ export default async function AnalysisPage() {
                         }
                       >
                         {t(
-                          `Araç ağırlıklı ortalamaya göre akşamlar ${comparedMonths(evening)} ayın ${fasterMonths(evening)}'inde hızlandı, ortalama ${formatSigned(evening.averageChange ?? 0)} km/sa. Ağırlıklar sabitlendiğinde fark ${formatSigned(fixedWeight.averageChange ?? 0)} km/sa ve hızlanan ay sayısı ${fasterMonths(fixedWeight)}. Medyan hücrede ${formatSigned(medianCell.averageChange ?? 0)} km/sa.`,
+                          `Araç ağırlıklı ortalamaya göre akşamlar ${comparedMonths(evening)} ayın ${suffix(fasterMonths(evening), "possessiveLocative")} hızlandı, ortalama ${formatSigned(evening.averageChange ?? 0)} km/sa. Ağırlıklar sabitlendiğinde fark ${formatSigned(fixedWeight.averageChange ?? 0)} km/sa ve hızlanan ay sayısı ${fasterMonths(fixedWeight)}. Medyan hücrede ${formatSigned(medianCell.averageChange ?? 0)} km/sa.`,
                           `By the vehicle-weighted average, evenings got faster in ${fasterMonths(evening)} of ${comparedMonths(evening)} months, by ${formatSigned(evening.averageChange ?? 0)} km/h on average. With fixed weights the change is ${formatSigned(fixedWeight.averageChange ?? 0)} km/h and ${fasterMonths(fixedWeight)} months got faster. The median cell changed by ${formatSigned(medianCell.averageChange ?? 0)} km/h.`,
                         )}
                       </Finding>
@@ -1140,7 +1141,7 @@ export default async function AnalysisPage() {
                       </Finding>
                     ) : null}
                     {worstRainHour ? (
-                      <Finding title={t(`Yağmur en çok ${formatHour(worstRainHour.hourOfDay)}'de etkiliyor`, `Rain hurts most at ${formatHour(worstRainHour.hourOfDay)}`)}>
+                      <Finding title={t(`Yağmur en çok ${suffix(formatHour(worstRainHour.hourOfDay), "locative")} etkiliyor`, `Rain hurts most at ${formatHour(worstRainHour.hourOfDay)}`)}>
                         {t(
                           `Bu saatte yağmurlu günler kuru günlere göre ${formatSigned(worstRainHour.speedChangeKmh ?? 0)} km/sa daha yavaş. Yoğun saatlerde yollar kapasitesine yakın çalıştığı için küçük bir yavaşlama kuyruğa dönüşür.`,
                           `At this hour rainy days are ${formatSigned(worstRainHour.speedChangeKmh ?? 0)} km/h slower than dry days. In the rush hours roads run close to capacity, so a small slowdown turns into a queue.`,
@@ -1317,7 +1318,6 @@ export default async function AnalysisPage() {
                       };
                     })}
                     compact
-                    cooperative
                     key={locale}
                     modes={changeModes}
                     searchable
@@ -1327,7 +1327,7 @@ export default async function AnalysisPage() {
                   {medianChange !== null ? (
                     <Finding title={t(`Medyan hücre ${formatSigned(medianChange)} km/sa`, `Median cell: ${formatSigned(medianChange)} km/h`)}>
                       {t(
-                        `Hücrelerin ${formatPercent(slowerShare ?? 0)}'inde akşam zirvesi 1 km/sa'ten fazla yavaşladı, ${formatPercent(fasterShare ?? 0)}'inde hızlandı. Değişimler hücrenin kendi geçmişiyle kıyaslandığı için ölçüm kapsamındaki saatlik dalgalanmalardan etkilenmez.`,
+                        `Hücrelerin ${suffix(formatPercent(slowerShare ?? 0), "possessiveLocative")} akşam zirvesi 1 km/sa'ten fazla yavaşladı, ${suffix(formatPercent(fasterShare ?? 0), "possessiveLocative")} hızlandı. Değişimler hücrenin kendi geçmişiyle kıyaslandığı için ölçüm kapsamındaki saatlik dalgalanmalardan etkilenmez.`,
                         `In ${formatPercent(slowerShare ?? 0)} of cells the evening peak got more than 1 km/h slower and in ${formatPercent(fasterShare ?? 0)} it got faster. Each cell is compared with its own past, so hourly swings in coverage do not affect the result.`,
                       )}
                     </Finding>
@@ -1434,7 +1434,7 @@ export default async function AnalysisPage() {
                 {volumeBreak ? (
                   <Finding title={t(`${formatMonth(volumeBreak.month)} itibarıyla sayım düzeyi değişti`, `The counting level changed in ${formatMonth(volumeBreak.month)}`)}>
                     {t(
-                      `Hücre başına araç bir ayda ${formatDecimal(volumeBreak.previous)}'ten ${formatDecimal(volumeBreak.current)}'e çıktı (${formatSignedPercent(volumeBreak.changePct)}) ve bu düzeyde kaldı. Hız serilerinde aynı kırılma görülmediği için bu, trafikteki bir artıştan çok İBB'nin araç sayımındaki bir değişikliğe işaret eder. Bu tarihin iki yanı arasında hacim karşılaştırılmaz.`,
+                      `Hücre başına araç bir ayda ${suffix(formatDecimal(volumeBreak.previous), "ablative")} ${suffix(formatDecimal(volumeBreak.current), "dative")} çıktı (${formatSignedPercent(volumeBreak.changePct)}) ve bu düzeyde kaldı. Hız serilerinde aynı kırılma görülmediği için bu, trafikteki bir artıştan çok İBB'nin araç sayımındaki bir değişikliğe işaret eder. Bu tarihin iki yanı arasında hacim karşılaştırılmaz.`,
                       `Vehicles per cell jumped from ${formatDecimal(volumeBreak.previous)} to ${formatDecimal(volumeBreak.current)} within a month (${formatSignedPercent(volumeBreak.changePct)}) and stayed there. The speed series show no such break, so this points to a change in IMM's vehicle counting rather than more traffic. Volumes are not compared across this date.`,
                     )}
                   </Finding>

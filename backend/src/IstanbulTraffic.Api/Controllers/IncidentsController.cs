@@ -25,6 +25,15 @@ public sealed class IncidentRoadsQuery : IncidentQuery
     public int Limit { get; init; } = IncidentRules.DefaultRoadLimit;
 }
 
+public sealed class LatestIncidentsQuery
+{
+    /// <summary>Optional category; without it every road incident counts.</summary>
+    public string? Category { get; init; }
+
+    /// <summary>How many announcements to return, 1-100.</summary>
+    public int Limit { get; init; } = IncidentRules.DefaultLatestLimit;
+}
+
 /// <summary>Traffic incidents announced by the IBB Traffic Management Centre since 2013.</summary>
 [ApiController]
 [Route("api/v1/incidents")]
@@ -75,6 +84,14 @@ public sealed class IncidentsController(IncidentsService service) : ControllerBa
     [HttpGet("weather")]
     public Task<IReadOnlyList<IncidentWeatherEffect>> GetWeather([FromQuery] IncidentQuery query, CancellationToken cancellationToken) =>
         service.GetWeatherAsync(query.ToFilter(), cancellationToken);
+
+    /// <summary>The newest announcements anywhere in the city, newest first.</summary>
+    [HttpGet("latest")]
+    public Task<IReadOnlyList<LatestIncident>> GetLatest([FromQuery] LatestIncidentsQuery query, CancellationToken cancellationToken) =>
+        service.GetLatestAsync(
+            string.IsNullOrWhiteSpace(query.Category) ? null : query.Category.Trim().ToLowerInvariant(),
+            query.Limit,
+            cancellationToken);
 
     /// <summary>Speed in the incident's cell around the incident, and what lies behind the slowest evenings.</summary>
     [HttpGet("traffic-impact")]

@@ -1,27 +1,32 @@
 import Link from "next/link";
+import { CountUp } from "@/components/CountUp";
 import { DailyTrendChart } from "@/components/charts/DailyTrendChart";
 import { HourlyChart } from "@/components/charts/HourlyChart";
 import { SeriesChart } from "@/components/charts/SeriesChart";
 import { Sparkline } from "@/components/charts/Sparkline";
 import { SpeedHeatmap } from "@/components/charts/SpeedHeatmap";
 import { FilterFrame } from "@/components/FilterFrame";
+import { NowCard } from "@/components/NowCard";
 import { ChartCard, DataTable, EmptyState, Finding, HorizontalBars, makeDelta, StatTile, type StatDelta } from "@/components/ui";
 import {
   getDailyTrend,
   getDayTypeComparison,
   getHeatmap,
   getHourlyProfile,
+  getIncidentWeekHour,
   getMetadata,
   getMonthlyInsights,
   getSpeedBands,
   getSummary,
 } from "@/lib/api";
-import { buildRange, dayTypeLabel, parseFilter, previousYear, rangeDays, type RawSearchParams } from "@/lib/filters";
+import { buildRange, dayTypeLabel, lastMonthsStart, parseFilter, previousYear, rangeDays, type RawSearchParams } from "@/lib/filters";
 import { makeFormat } from "@/lib/format";
 import { translator } from "@/lib/i18n/locale";
 import { getLocale } from "@/lib/i18n/server";
+import { suffix } from "@/lib/i18n/turkish";
 import { dayName } from "@/lib/i18n/terms";
 import { findVolumeBreak, maximumHour, minimumHour, spansBreak } from "@/lib/insights";
+import { incidentsPerWeek } from "@/lib/now";
 import type { HourlyPoint, TrafficSummary } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -73,7 +78,9 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
   const earlier = previousYear(filter, range);
   const showHeatmap = rangeDays(filter.from, filter.to) <= HEATMAP_MAX_DAYS;
 
-  const [summary, hourly, comparison, daily, heatmap, bands, previousSummary, previousHourly, monthly] = await Promise.all([
+  // The live card always uses the latest 12 months, whatever the filter says.
+  const baseline = { from: lastMonthsStart(12, range), to: range.lastDate, dayType: "all" as const };
+  const [summary, hourly, comparison, daily, heatmap, bands, previousSummary, previousHourly, monthly, baselineHours, incidentSlots] = await Promise.all([
     getSummary(filter),
     getHourlyProfile(filter),
     getDayTypeComparison(filter),
@@ -83,6 +90,9 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
     earlier ? getSummary(earlier) : Promise.resolve(null),
     earlier ? getHourlyProfile(earlier) : Promise.resolve(null),
     getMonthlyInsights(),
+    getDayTypeComparison(baseline),
+    // Default incident window: the latest 12 months of announcements.
+    getIncidentWeekHour({}).catch(() => null),
   ]);
 
   const { totals, slowestHour, fastestHour } = summary;
@@ -147,7 +157,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
           <div className="hero-figure">
             <div className="hero-figure-label">{t("Bu dönemde ölçülen", "Measured in this period")}</div>
             <div className="hero-figure-value">
-              {formatLargeCount(totals.observationCount)}
+              <CountUp text={formatLargeCount(totals.observationCount)} />
               <small>{t("saatlik ölçüm", "hourly readings")}</small>
             </div>
             <p className="hero-figure-note">
@@ -159,6 +169,13 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
           </div>
         ) : null}
       </div>
+
+      <NowCard
+        basis={`${formatMonth(baseline.from)} - ${formatMonth(baseline.to)}`}
+        incidentsPerWeek={incidentSlots ? incidentsPerWeek(incidentSlots, 365) : null}
+        weekday={HOURS.map((hour) => baselineHours.find((point) => point.hourOfDay === hour)?.weekdaySpeedKmh ?? null)}
+        weekend={HOURS.map((hour) => baselineHours.find((point) => point.hourOfDay === hour)?.weekendSpeedKmh ?? null)}
+      />
 
       <FilterFrame filter={filter} months={metadata.loadedMonths} range={range}>
         {!hasData ? (
@@ -415,7 +432,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
                       </Finding>
                     ) : null}
                     {biggestDrop && biggestDrop.value > 0.5 ? (
-                      <Finding title={t(`En büyük kayıp ${formatHour(biggestDrop.hour)}'de`, `Biggest loss at ${formatHour(biggestDrop.hour)}`)}>
+                      <Finding title={t(`En büyük kayıp ${suffix(formatHour(biggestDrop.hour), "locative")}`, `Biggest loss at ${formatHour(biggestDrop.hour)}`)}>
                         {t(
                           `Bu saatte şehir bir yıl öncesine göre ${formatDecimal(biggestDrop.value)} km/sa daha yavaş.`,
                           `At this hour the city is ${formatDecimal(biggestDrop.value)} km/h slower than a year earlier.`,

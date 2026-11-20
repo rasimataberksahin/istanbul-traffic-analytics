@@ -114,3 +114,12 @@ export function periodOptions(firstDate: string, lastDate: string): PeriodOption
 export function changePct(current: number, previous: number | null | undefined): number | null {
   return previous ? ((current - previous) / previous) * 100 : null;
 }
+
+/** Announcement text as published, minus doubled full stops and stray spaces ("devam etmektedir.."). */
+export function tidyTitle(title: string): string {
+  return title
+    .replace(/\s+/g, " ")
+    .replace(/\s+([.,])/g, "$1")
+    .replace(/\.{2,}(?=\s|$)/g, ".")
+    .trim();
+}

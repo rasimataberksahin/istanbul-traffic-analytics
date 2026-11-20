@@ -114,6 +114,34 @@ public sealed record IncidentItem
     public int? ClosedLanes { get; init; }
 }
 
+/// <summary>One of the newest announcements anywhere in the city, with where it happened.</summary>
+public sealed record LatestIncident
+{
+    public long IncidentId { get; init; }
+
+    public DateTime StartedAt { get; init; }
+
+    public DateTime? EndedAt { get; init; }
+
+    public string Category { get; init; } = string.Empty;
+
+    public string? Severity { get; init; }
+
+    public string Title { get; init; } = string.Empty;
+
+    public string? Road { get; init; }
+
+    public decimal? DurationMin { get; init; }
+
+    public int? ClosedLanes { get; init; }
+
+    public string Geohash { get; init; } = string.Empty;
+
+    public string? Neighborhood { get; init; }
+
+    public string? District { get; init; }
+}
+
 public sealed record IncidentCellDetail(
     IncidentCell Cell,
     IReadOnlyList<CategoryCount> Categories,

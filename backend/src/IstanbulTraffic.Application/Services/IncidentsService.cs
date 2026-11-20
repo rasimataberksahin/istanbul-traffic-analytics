@@ -45,6 +45,14 @@ public sealed class IncidentsService(IIncidentsRepository repository)
     public Task<IncidentTrafficImpact> GetTrafficImpactAsync(CancellationToken cancellationToken) =>
         repository.GetTrafficImpactAsync(cancellationToken);
 
+    /// <summary>The newest announcements across the city, newest first; news and ferry notices are left out.</summary>
+    public Task<IReadOnlyList<LatestIncident>> GetLatestAsync(string? category, int limit, CancellationToken cancellationToken)
+    {
+        IncidentRequestValidator.Validate(new IncidentFilter(null, null, category));
+        IncidentRequestValidator.ValidateLimit(limit);
+        return repository.GetLatestAsync(category, limit, cancellationToken);
+    }
+
     /// <summary>Validates the filter and fills missing dates with the latest twelve months of data.</summary>
     private async Task<ResolvedIncidentFilter> ResolveAsync(IncidentFilter filter, CancellationToken cancellationToken)
     {

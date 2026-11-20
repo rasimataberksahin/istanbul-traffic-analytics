@@ -85,7 +85,32 @@ public sealed class IncidentTests(ApiFixture fixture)
         Assert.All(recovery, point => Assert.Equal(0m, point.GetProperty("speedChangeKmh").GetDecimal()));
     }
 
+    [Fact]
+    public async Task Latest_lists_road_incidents_newest_first()
+    {
+        var latest = await GetAsync("/api/v1/incidents/latest");
+        var first = latest[0];
+
+        Assert.Equal(3, latest.GetArrayLength());
+        Assert.Equal(2, first.GetProperty("incidentId").GetInt64());
+        Assert.Equal("TEM", first.GetProperty("road").GetString());
+        Assert.Equal("sxk3z1", first.GetProperty("geohash").GetString());
+        Assert.Equal(1, latest[1].GetProperty("incidentId").GetInt64());
+        Assert.Equal("Merkezefendi", latest[1].GetProperty("neighborhood").GetString());
+    }
+
+    [Fact]
+    public async Task Latest_takes_a_category_and_a_limit()
+    {
+        var latest = await GetAsync("/api/v1/incidents/latest?category=accident&limit=1");
+
+        Assert.Equal(1, latest.GetArrayLength());
+        Assert.Equal("injury", latest[0].GetProperty("severity").GetString());
+    }
+
     [Theory]
+    [InlineData("/api/v1/incidents/latest?limit=101", HttpStatusCode.BadRequest)]
+    [InlineData("/api/v1/incidents/latest?category=parade", HttpStatusCode.BadRequest)]
     [InlineData("/api/v1/incidents/summary?category=parade", HttpStatusCode.BadRequest)]
     [InlineData("/api/v1/incidents/summary?from=2024-10-05&to=2024-10-01", HttpStatusCode.BadRequest)]
     [InlineData("/api/v1/incidents/roads?limit=0", HttpStatusCode.BadRequest)]

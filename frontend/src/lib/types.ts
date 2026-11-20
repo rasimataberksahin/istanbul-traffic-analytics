@@ -318,6 +318,22 @@ export interface RoadSegment {
   geohash: string | null;
 }
 
+/** One of the newest announcements anywhere in the city. */
+export interface LatestIncident {
+  incidentId: number;
+  startedAt: string;
+  endedAt: string | null;
+  category: IncidentCategory;
+  severity: AccidentSeverity | null;
+  title: string;
+  road: string | null;
+  durationMin: number | null;
+  closedLanes: number | null;
+  geohash: string;
+  neighborhood: string | null;
+  district: string | null;
+}
+
 export interface IncidentCellDetail {
   cell: IncidentCell;
   categories: IncidentCategoryCount[];

@@ -446,6 +446,22 @@ internal sealed class IncidentsRepository(NpgsqlDataSource dataSource) : IIncide
         return cell with { Latitude = Math.Round(latitude, 5), Longitude = Math.Round(longitude, 5) };
     }
 
+    public Task<IReadOnlyList<LatestIncident>> GetLatestAsync(string? category, int limit, CancellationToken cancellationToken)
+    {
+        var sql = $"""
+            SELECT i.incident_id, i.started_at, i.ended_at, i.category, i.severity, i.title, i.road,
+                   i.duration_min, i.closed_lanes, i.geohash, i.neighborhood, i.district
+            FROM traffic.fact_incident AS i
+            WHERE {(category is null ? RoadOnly : "i.category = @Category")}
+            ORDER BY i.started_at DESC, i.incident_id DESC
+            LIMIT @Limit
+            """;
+        var parameters = new DynamicParameters();
+        parameters.Add("Category", category);
+        parameters.Add("Limit", limit);
+        return QueryAsync<LatestIncident>(sql, parameters, cancellationToken);
+    }
+
     private static string CategoryClause(ResolvedIncidentFilter filter) =>
         filter.Category is null ? RoadOnly : "i.category = @Category";
 

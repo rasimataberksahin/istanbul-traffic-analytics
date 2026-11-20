@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import { AppHeader } from "@/components/AppHeader";
+import { StickyFilters } from "@/components/StickyFilters";
 import { LocaleProvider } from "@/lib/i18n/client";
 import { translator } from "@/lib/i18n/locale";
 import { getLocale, getTheme } from "@/lib/i18n/server";
@@ -47,6 +48,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             {t("İçeriğe geç", "Skip to content")}
           </a>
           <AppHeader theme={theme} />
+          <StickyFilters />
           <main className="main" id="icerik">
             {children}
           </main>
@@ -66,6 +68,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                   {t("Trafik verisi", "Traffic data")}:{" "}
                   <a href="https://data.ibb.gov.tr/dataset/hourly-traffic-density-data-set" rel="noreferrer">
                     {t("İBB Açık Veri Portalı", "IMM Open Data Portal")}
+                  </a>
+                </li>
+                <li>
+                  {t("Trafik olayları", "Traffic incidents")}:{" "}
+                  <a href="https://data.ibb.gov.tr/dataset/ulasim-yonetim-merkezi-trafik-duyurulari-verisi" rel="noreferrer">
+                    {t("İBB Ulaşım Yönetim Merkezi", "IMM Traffic Management Centre")}
                   </a>
                 </li>
                 <li>

@@ -87,6 +87,7 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
 
   const selected = parseGeohash(params) ?? slowest[0]?.geohash ?? points[0]?.geohash ?? null;
   const profile = selected ? await getLocationProfile(selected, filter) : null;
+  const cellAccidents = selected ? (accidentsByCell.get(selected)?.accidents ?? 0) : 0;
   const selectedPoint = points.find((point) => point.geohash === selected);
   const volumeThresholds = quantileThresholds(points.map((point) => point.averagePeakVehicleCount));
   const districts = summarizeDistricts(points).slice(0, RANKED_DISTRICTS);
@@ -185,11 +186,15 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
                       </div>
                     </dl>
                     {selected ? (
-                      <p className="panel-incidents">
-                        {t(
-                          `Bu dönemde bu hücrede ${formatInteger(accidentsByCell.get(selected)?.accidents ?? 0)} kaza duyuruldu.`,
-                          `${formatInteger(accidentsByCell.get(selected)?.accidents ?? 0)} accidents were announced in this cell in the period.`,
-                        )}{" "}
+                      <p className={cellAccidents > 0 ? "panel-incidents" : "panel-incidents quiet"}>
+                        {cellAccidents > 0
+                          ? t(
+                              `Bu dönemde bu hücrede ${formatInteger(cellAccidents)} kaza duyuruldu.`,
+                              cellAccidents === 1
+                                ? "1 accident was announced in this cell in the period."
+                                : `${formatInteger(cellAccidents)} accidents were announced in this cell in the period.`,
+                            )
+                          : t("Bu dönemde bu hücrede duyurulan kaza yok.", "No accidents were announced in this cell in the period.")}{" "}
                         <Link href={`/olaylar?from=${filter.from}&to=${filter.to}&cell=${selected}#harita`}>{t("Olayları gör", "See incidents")}</Link>
                       </p>
                     ) : null}

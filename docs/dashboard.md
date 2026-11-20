@@ -20,14 +20,22 @@ Uygulama `http://localhost:3000` adresinde açılır. API'nin `http://127.0.0.1:
 
 | Yol | Ekran | İçerik |
 |---|---|---|
-| `/` | Genel bakış | Seçilen dönemin göstergeleri ve bir önceki yılın aynı tarihleriyle farkı, saatlik hız, hız bantları, günlük trend, gün ve saat ısı haritası |
+| `/` | Genel bakış | "Şimdi" kartı: saniye saniye işleyen İstanbul saati, bu saatin tipik hızı ve yoğunluk düzeyi, önümüzdeki 12 saatin en yoğun saati, bu gün ve saatte haftada duyurulan olay sayısı, 24 saatlik yoğunluk şeridi. Altında seçilen dönemin göstergeleri ve bir önceki yılın aynı tarihleriyle farkı, saatlik hız, hız bantları, günlük trend, gün ve saat ısı haritası |
 | `/analiz` | Analiz raporu | Tüm ayları kapsayan 13 bölümlük uzun rapor |
 | `/harita` | Tıkanıklık haritası | Gerçek harita altlığı üzerinde hücre bazında tıkanıklık, akşam hızı, araç yoğunluğu ve aynı dönemdeki kazalar; semt ve ilçe araması, 2B/3B görünüm, hızlı git düğmeleri, seçili semtin saatlik profili, ilçelere göre akşam tıkanıklığı, en yavaş 15 semt |
-| `/olaylar` | Trafik olayları | 2013'ten bugüne kaza, arıza ve yol çalışmaları: dönem ve tür filtresi, olay haritası ve semt paneli (saatlik dağılım, en sık olay yaşanan kesimler, son olaylar), aylık trend, gün ve saat ısı haritası, yollar ve kesimler, süreler, yağmurda kaza oranı, kazanın trafiğe etkisi ve en yavaş akşamlar |
+| `/olaylar` | Trafik olayları | 2013'ten bugüne kaza, arıza ve yol çalışmaları: dönem ve tür filtresi, olay haritası ve semt paneli (saatlik dağılım, en sık olay yaşanan kesimler, son olaylar), aylık trend, gün ve saat ısı haritası, yollar ve kesimler, süreler, yağmurda kaza oranı, kazanın trafiğe etkisi ve en yavaş akşamlar. Başlığın altında şehrin en yeni duyurularını taşıyan, üzerine gelince duran kayan bir şerit vardır |
 | `/veri-hatti` | Veri hattı | Yüklenen aylar, aylık veri kapsamı, kalite işaretleri, yükleme geçmişi |
 | `/kilavuz` | Kullanım kılavuzu | Her ekranın ne gösterdiği, kontrollerin kullanımı ve grafiklerde geçen kavramların sözlüğü |
 
 Her gösterge ve grafik kartının sağ üst köşesinde bir "i" düğmesi vardır. Düğme, kartın neyi gösterdiğini ve nasıl okunacağını anlatan kısa bir açıklama açar.
+
+### Canlılık ve davranış
+
+- Sayfa geçişlerinde veri gelene kadar sayfanın iskeleti hemen görünür.
+- Göstergelerdeki sayılar görünür olduklarında akarak gelir; filtre değişince eski değerden yenisine kayar. Hareket azaltma ayarı açıksa sayılar doğrudan yazılır.
+- Filtre çubuğu sayfayla birlikte kayınca tek satırlık ince bir şeride dönüşür ve alttaki içeriği oynatmaz.
+- Haritalar sayfanın içindedir: fare tekerleği sayfayı kaydırır, yakınlaştırmak için Ctrl (Mac'te ⌘) ile birlikte kullanılır, dokunmatik ekranda iki parmak gerekir. Tam ekranda tekerlek doğrudan yakınlaştırır.
+- Sayılardan sonra gelen Türkçe ekler sayının okunuşuna göre üretilir ("%16'sında", "%40'ında", "2026'da"); [`lib/i18n/turkish.ts`](../frontend/src/lib/i18n/turkish.ts).
 
 ### Analiz raporu bölümleri
 

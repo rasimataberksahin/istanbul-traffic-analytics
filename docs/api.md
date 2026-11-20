@@ -78,6 +78,7 @@ Bu uçlar filtre almaz ve yüklenen tüm ayları kapsar. Hepsi özet katmandan o
 | GET | `/api/v1/incidents/roads` | Yollara göre olaylar ve en çok olay yaşanan kesimler |
 | GET | `/api/v1/incidents/durations` | Kategoriye ve yıla göre olay ve müdahale süreleri |
 | GET | `/api/v1/incidents/weather` | Yağmur ve karda kaza oranı, aynı ay ve saatin kuru saatlerine göre |
+| GET | `/api/v1/incidents/latest` | Şehrin her yerinden en yeni duyurular, semt ve ilçesiyle (`limit` 1-100, isteğe bağlı `category`) |
 | GET | `/api/v1/incidents/traffic-impact` | Olay öncesi ve sonrası hücre hızı, kapanan şeride göre etki, en yavaş akşamlar |
 | GET | `/api/v1/insights/weather` | Hafif yağmur, kuvvetli yağmur ve karın hız ve hacme etkisi; saatlik etki, ilçelerin yağmur hassasiyeti, en yağışlı akşamlar |
 

@@ -32,6 +32,7 @@ import type {
   IncidentTrafficImpact,
   IncidentWeatherEffect,
   IncidentWeekHour,
+  LatestIncident,
 } from "@/lib/types";
 
 const baseUrl = process.env.API_BASE_URL ?? "http://127.0.0.1:5088";
@@ -169,6 +170,8 @@ export const getIncidentMonthly = () => get<IncidentMonth[]>("/api/v1/incidents/
 
 export const getIncidentWeekHour = (query: IncidentQuery) =>
   get<IncidentWeekHour[]>("/api/v1/incidents/week-hour", incidentQuery(query));
+
+export const getLatestIncidents = (limit = 12) => get<LatestIncident[]>("/api/v1/incidents/latest", { limit });
 
 export const getIncidentCells = (query: IncidentQuery) => get<IncidentCell[]>("/api/v1/incidents/cells", incidentQuery(query));
 

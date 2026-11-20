@@ -10,7 +10,7 @@
 |---|---|
 | **Veri** | Trafik: Ocak 2023 - Ocak 2025, 40,1 milyon saatlik ölçüm, 2.464 konum hücresi · Olaylar: Şubat 2013 - Ekim 2026, 264 bin kaza, arıza ve yol çalışması, aylık güncel · Hava: saatlik, 2013-2026 |
 | **Hat** | Python ETL → PostgreSQL yıldız şema ve özet katman → ASP.NET Core API → Next.js dashboard |
-| **Kalite** | 295 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
+| **Kalite** | 338 otomatik test, GitHub Actions CI, tek komutla Docker Compose |
 
 ## Öne çıkan bulgular
 
@@ -158,7 +158,7 @@ Ayrıntılar: [Veritabanı tasarımı](docs/database.md) · [Ekim 2024 SQL anali
 
 ## REST API
 
-.NET 10 ile yazılan katmanlı API 32 endpoint sunar: anlık filtreli analizler, 25 ayı kapsayan uzun dönem analizleri, konum analizleri, 2013'ten bugüne trafik olayları ve veri hattı yönetimi.
+.NET 10 ile yazılan katmanlı API 33 endpoint sunar: anlık filtreli analizler, 25 ayı kapsayan uzun dönem analizleri, konum analizleri, 2013'ten bugüne trafik olayları ve veri hattı yönetimi.
 
 - **Dapper / Npgsql:** Özet katman ve ham tablo üzerinde elle yazılmış analitik SQL
 - **EF Core:** `admin` şemasındaki yönetim tabloları ve migration'lar
@@ -193,8 +193,8 @@ Ayrıntılar: [Trafik olayları](docs/incidents.md)
 | Bileşen | Araç | Test |
 |---|---|---:|
 | ETL | pytest, geçici PostgreSQL veritabanları | 116 |
-| Backend | xUnit v3, Testcontainers | 96 |
-| Frontend | Vitest | 83 |
+| Backend | xUnit v3, Testcontainers | 100 |
+| Frontend | Vitest | 122 |
 
 GitHub Actions her push ve pull request'te üç test grubunu, lint ve tip kontrolünü, üretim derlemesini ve üç Docker imajının derlenmesini çalıştırır.
 

@@ -3,7 +3,7 @@
 import { Desktop, Moon, Sun } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useI18n } from "@/lib/i18n/client";
 import { LOCALE_COOKIE, PREFERENCE_MAX_AGE, THEME_COOKIE, type Locale, type Theme } from "@/lib/i18n/locale";
 
@@ -31,6 +31,31 @@ export function AppHeader({ theme: initialTheme }: { theme: Theme }) {
   const { locale, t } = useI18n();
   const [theme, setTheme] = useState<Theme>(initialTheme);
   const [isPending, startTransition] = useTransition();
+  const navRef = useRef<HTMLElement>(null);
+
+  // On narrow screens the menu scrolls sideways: keep the current page in view and mark which
+  // edges still hide links, so the fade appears only where there is more to see.
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) {
+      return;
+    }
+    const markEdges = () => {
+      nav.classList.toggle("at-start", nav.scrollLeft <= 1);
+      nav.classList.toggle("at-end", nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 1);
+    };
+    const current = nav.querySelector<HTMLElement>('[aria-current="page"]');
+    if (current && nav.scrollWidth > nav.clientWidth) {
+      nav.scrollTo({ left: current.offsetLeft - (nav.clientWidth - current.offsetWidth) / 2, behavior: "smooth" });
+    }
+    markEdges();
+    nav.addEventListener("scroll", markEdges, { passive: true });
+    window.addEventListener("resize", markEdges);
+    return () => {
+      nav.removeEventListener("scroll", markEdges);
+      window.removeEventListener("resize", markEdges);
+    };
+  }, [pathname]);
 
   const links = [
     { href: "/", label: t("Genel bakış", "Overview") },
@@ -77,7 +102,7 @@ export function AppHeader({ theme: initialTheme }: { theme: Theme }) {
             <span className="brand-sub">{t("İBB saatlik trafik verisi", "IMM hourly traffic data")}</span>
           </span>
         </Link>
-        <nav aria-label={t("Ana menü", "Main menu")} className="nav">
+        <nav aria-label={t("Ana menü", "Main menu")} className="nav" ref={navRef}>
           {links.map((link) => (
             <Link key={link.href} aria-current={pathname === link.href ? "page" : undefined} href={link.href}>
               {link.label}

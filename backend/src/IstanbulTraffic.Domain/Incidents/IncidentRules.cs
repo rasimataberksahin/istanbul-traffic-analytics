@@ -31,6 +31,9 @@ public static class IncidentRules
     public const int DefaultRoadLimit = 20;
     public const int LatestIncidentsPerCell = 8;
 
+    /// <summary>Newest announcements across the city, for the incident feed.</summary>
+    public const int DefaultLatestLimit = 12;
+
     /// <summary>A road segment needs this many incidents in the period to be ranked.</summary>
     public const int MinimumSegmentIncidents = 5;
 }

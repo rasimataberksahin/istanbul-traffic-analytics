@@ -71,6 +71,8 @@ public interface IIncidentsRepository
     Task<IReadOnlyList<IncidentWeatherEffect>> GetWeatherAsync(ResolvedIncidentFilter filter, CancellationToken cancellationToken);
 
     Task<IncidentTrafficImpact> GetTrafficImpactAsync(CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<LatestIncident>> GetLatestAsync(string? category, int limit, CancellationToken cancellationToken);
 }
 
 public interface IPipelineSnapshotReader

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CountUp } from "@/components/CountUp";
+import { IncidentTicker } from "@/components/IncidentTicker";
 import { Sparkline } from "@/components/charts/Sparkline";
 import { MatrixHeatmap } from "@/components/charts/MatrixHeatmap";
 import { SeriesChart } from "@/components/charts/SeriesChart";
@@ -27,12 +29,14 @@ import {
   getIncidentTrafficImpact,
   getIncidentWeather,
   getIncidentWeekHour,
+  getLatestIncidents,
   type IncidentQuery,
 } from "@/lib/api";
 import { formatHour, makeFormat } from "@/lib/format";
 import { parseGeohash, type RawSearchParams } from "@/lib/filters";
 import { translator, type Translate } from "@/lib/i18n/locale";
 import { getLocale } from "@/lib/i18n/server";
+import { suffix } from "@/lib/i18n/turkish";
 import { dayName } from "@/lib/i18n/terms";
 import {
   busiestSlot,
@@ -46,6 +50,7 @@ import {
   recoveryLabel,
   recoverySeries,
   severityLabel,
+  tidyTitle,
 } from "@/lib/incidents";
 import { placeLabel } from "@/lib/places";
 import { classOf } from "@/lib/scale";
@@ -119,7 +124,7 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
   };
   const options = periodOptions(metadata.firstDate, metadata.lastDate);
 
-  const [summary, monthly, weekHour, cells, roads, durations, weather, impact] = await Promise.all([
+  const [summary, monthly, weekHour, cells, roads, durations, weather, impact, latest] = await Promise.all([
     getIncidentSummary(query),
     getIncidentMonthly(),
     getIncidentWeekHour(query),
@@ -128,6 +133,7 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
     getIncidentDurations(query),
     getIncidentWeather(query),
     getIncidentTrafficImpact(),
+    getLatestIncidents(14).catch(() => []),
   ]);
   const period = { from: summary.filter.from, to: summary.filter.to, category: query.category };
   const activeKey =
@@ -217,12 +223,16 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
         </header>
         <div className="hero-figure">
           <div className="hero-figure-label">{t("Toplam duyuru", "Announcements")}</div>
-          <div className="hero-figure-value">{formatLargeCount(metadata.incidentCount)}</div>
+          <div className="hero-figure-value">
+            <CountUp text={formatLargeCount(metadata.incidentCount)} />
+          </div>
           <p className="hero-figure-note">
             {t(`Son olay ${formatLongDate(metadata.lastDate)}, aylık güncellenir`, `Latest ${formatLongDate(metadata.lastDate)}, updated monthly`)}
           </p>
         </div>
       </div>
+
+      <IncidentTicker items={latest} locale={locale} />
 
       <IncidentFilters
         activeKey={activeKey}
@@ -267,7 +277,7 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
             )}
             label={t("Kaza süresi (medyan)", "Accident duration (median)")}
             note={t(
-              `Müdahale ${minutes(accidents?.medianResponseMin)}, kayıtların %${formatInteger(responseShare)}'inde`,
+              `Müdahale ${minutes(accidents?.medianResponseMin)}, kayıtların ${suffix("%" + formatInteger(responseShare), "possessiveLocative")}`,
               `Response ${minutes(accidents?.medianResponseMin)}, in ${formatInteger(responseShare)}% of records`,
             )}
             value={minutes(accidents?.medianDurationMin)}
@@ -381,7 +391,7 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
                               {item.severity ? ` · ${severityLabel(item.severity, locale)}` : ` · ${categoryLabel(item.category, locale)}`}
                               {item.durationMin ? ` · ${minutes(item.durationMin)}` : ""}
                             </span>
-                            <span className="incident-title">{item.title}</span>
+                            <span className="incident-title">{tidyTitle(item.title)}</span>
                           </li>
                         ))}
                       </ul>
@@ -770,13 +780,13 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
                 <div className="span-12 findings-grid">
                   <Finding title={t("En kötü akşamların nedeni çoğu zaman yağmur", "The worst evenings are mostly rainy ones")}>
                     {t(
-                      `Şehrin en yavaş %10'luk iş günü akşamlarının ${formatPercent(explanation.slowWithRainPct)}'inde 17:00-19:59 arasında en az 1 mm yağmur yağdı; tüm akşamlarda bu oran ${formatPercent(explanation.allWithRainPct)}.`,
+                      `Şehrin en yavaş %10'luk iş günü akşamlarının ${suffix(formatPercent(explanation.slowWithRainPct), "possessiveLocative")} 17:00-19:59 arasında en az 1 mm yağmur yağdı; tüm akşamlarda bu oran ${formatPercent(explanation.allWithRainPct)}.`,
                       `${formatPercent(explanation.slowWithRainPct)} of the slowest 10% of workday evenings had at least 1 mm of rain between 17:00 and 19:59, against ${formatPercent(explanation.allWithRainPct)} of all evenings.`,
                     )}
                   </Finding>
                   <Finding title={t("Ağır kaza tek başına açıklamıyor", "Serious accidents alone do not explain them")}>
                     {t(
-                      `En yavaş akşamların ${formatPercent(explanation.slowWithSevereAccidentPct)}'inde ağır kaza vardı, ama tüm akşamlarda da oran ${formatPercent(explanation.allWithSevereAccidentPct)}. Ağır kazalar her akşam bir yerlerde oluyor; şehir genelini yavaşlatan, yağmur gibi her yeri aynı anda etkileyen koşullar.`,
+                      `En yavaş akşamların ${suffix(formatPercent(explanation.slowWithSevereAccidentPct), "possessiveLocative")} ağır kaza vardı, ama tüm akşamlarda da oran ${formatPercent(explanation.allWithSevereAccidentPct)}. Ağır kazalar her akşam bir yerlerde oluyor; şehir genelini yavaşlatan, yağmur gibi her yeri aynı anda etkileyen koşullar.`,
                       `${formatPercent(explanation.slowWithSevereAccidentPct)} of the slowest evenings had a serious accident, but so did ${formatPercent(explanation.allWithSevereAccidentPct)} of all evenings. Serious accidents happen somewhere almost every evening; what slows the whole city are conditions, like rain, that hit everywhere at once.`,
                     )}
                   </Finding>

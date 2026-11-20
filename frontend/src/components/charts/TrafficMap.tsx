@@ -93,7 +93,10 @@ interface TrafficMapProps {
   selected?: string | null;
   /** Floating card for the selected cell; it moves below the map on narrow screens. */
   panel?: ReactNode;
-  /** Requires Ctrl + scroll to zoom, for maps inside long pages. */
+  /**
+   * Requires Ctrl + scroll (two fingers on touch) to zoom, so the wheel keeps scrolling the
+   * page. On by default because every map sits in a scrolling page; full screen turns it off.
+   */
   cooperative?: boolean;
   /** Short note under the legend, such as what one cell measures. */
   note?: string;
@@ -209,7 +212,7 @@ export function TrafficMap({
   selectParam,
   selected = null,
   panel,
-  cooperative = false,
+  cooperative = true,
   note,
   compact = false,
   searchable = false,
@@ -309,6 +312,7 @@ export function TrafficMap({
     const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
     let onSchemeChange: (() => void) | null = null;
     let themeObserver: MutationObserver | null = null;
+    let onFullscreen: (() => void) | null = null;
 
     void import("maplibre-gl").then(({ Map, NavigationControl, FullscreenControl, ScaleControl, AttributionControl, setWorkerUrl }) => {
       if (cancelled) {
@@ -398,6 +402,17 @@ export function TrafficMap({
         map.setStyle(dark ? STYLE_DARK : STYLE_LIGHT);
       };
       darkQuery.addEventListener("change", onSchemeChange);
+      if (cooperative) {
+        // In full screen there is no page to scroll, so the wheel zooms again.
+        onFullscreen = () => {
+          if (document.fullscreenElement && document.fullscreenElement === shellRef.current) {
+            map.cooperativeGestures.disable();
+          } else {
+            map.cooperativeGestures.enable();
+          }
+        };
+        document.addEventListener("fullscreenchange", onFullscreen);
+      }
       themeObserver = new MutationObserver(onSchemeChange);
       themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     });
@@ -408,6 +423,9 @@ export function TrafficMap({
         darkQuery.removeEventListener("change", onSchemeChange);
       }
       themeObserver?.disconnect();
+      if (onFullscreen) {
+        document.removeEventListener("fullscreenchange", onFullscreen);
+      }
       mapRef.current?.remove();
       mapRef.current = null;
     };
